@@ -25,7 +25,7 @@ metadata = MetaData()
 # --- Definição da Tabela ---
 usuarios_table = Table('usuarios', metadata,
     Column('id', Integer, primary_key=True),
-    Column('matricula', String, unique=True),
+    Column('CPF', String, unique=True),
     Column('nome', String),
     Column('email', String),
     Column('senha', String),   # Hash da senha (em string)
@@ -55,13 +55,13 @@ def carregar_usuarios():
         return [dict(row._mapping) for row in result]
 
 # --- Verificar se matrícula já existe ---
-def usuario_existe(matricula):
+def usuario_existe(CPF):
     with engine.connect() as conn:
-        result = conn.execute(select(usuarios_table).where(usuarios_table.c.matricula == matricula))
+        result = conn.execute(select(usuarios_table).where(usuarios_table.c.CPF == CPF))
         return result.fetchone() is not None
 
 # --- Autenticar usuário ---
-def autentica(matricula, senha):
+def autentica(CPF, senha):
     with engine.connect() as conn:
         result = conn.execute(select(usuarios_table).where(usuarios_table.c.matricula == matricula))
         user = result.fetchone()
@@ -168,7 +168,7 @@ if "usuario_logado" not in st.session_state:
 # ---- PÁGINA DE LOGIN ----
 if st.session_state.page == "login":
     st.title("Login")
-    matricula = st.text_input("Matrícula FuB")
+    CPF = st.text_input("CPF")
     senha = st.text_input("Senha", type="password")
     if st.button("Entrar"):
         user = autentica(matricula, senha)
@@ -188,7 +188,7 @@ if st.session_state.page == "login":
 elif st.session_state.page == "criar_conta":
     st.title("Criar nova conta")
     nome = st.text_input("Nome completo")
-    matricula = st.text_input("Matrícula FuB")
+    CPF = st.text_input("CPF")
     email = st.text_input("Email")
     senha = st.text_input("Senha", type="password")
     perfil = st.radio("Tipo de usuário", ["aluno", "servidor"])
@@ -201,7 +201,7 @@ elif st.session_state.page == "criar_conta":
         else:
             hashed = bcrypt.hashpw(senha.encode(), bcrypt.gensalt()).decode()
             usuario = {
-                "matricula": matricula,
+                "CPF": CPF,
                 "nome": nome,
                 "email": email,
                 "senha": hashed,
