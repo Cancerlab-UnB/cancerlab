@@ -194,8 +194,8 @@ elif st.session_state.page == "criar_conta":
     perfil = st.radio("Tipo de usuário", ["aluno", "servidor"])
     if st.button("Registrar"):
         # Verifica duplicidade
-        if usuario_existe(matricula):  # Aqui você já tem uma função que busca no banco
-            st.error("Matrícula já cadastrada!")
+        if usuario_existe(CPF):  # Aqui você já tem uma função que busca no banco
+            st.error("CPF já cadastrado!")
         elif not (nome and matricula and email and senha):
             st.error("Preencha todos os campos!")
         else:
