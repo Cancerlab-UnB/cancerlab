@@ -171,7 +171,7 @@ if st.session_state.page == "login":
     CPF = st.text_input("CPF")
     senha = st.text_input("Senha", type="password")
     if st.button("Entrar"):
-        user = autentica(matricula, senha)
+        user = autentica(CPF, senha)
         if user:
             st.session_state.usuario_logado = user
             st.success(f"Bem-vindo, {user['nome']}!")
