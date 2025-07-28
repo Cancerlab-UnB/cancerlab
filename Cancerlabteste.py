@@ -350,8 +350,7 @@ elif st.session_state.page == "biopsia":
     # Garante que as colunas existem
     if 'TCLE FOTO' not in df.columns:
         df['TCLE FOTO'] = ""
-    if 'data TCLE' not in df.columns:
-        df['data TCLE'] = ""
+
     
     tcle_path = df.at[idx, 'TCLE FOTO']
     
