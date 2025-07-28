@@ -63,7 +63,7 @@ def usuario_existe(CPF):
 # --- Autenticar usuário ---
 def autentica(CPF, senha):
     with engine.connect() as conn:
-        result = conn.execute(select(usuarios_table).where(usuarios_table.c.matricula == matricula))
+        result = conn.execute(select(usuarios_table).where(usuarios_table.c.CPF == CPF))
         user = result.fetchone()
         if user:
             user_dict = dict(user._mapping)
