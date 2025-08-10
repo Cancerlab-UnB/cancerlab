@@ -16,12 +16,13 @@ import smtplib
 from email.message import EmailMessage
 from sqlalchemy import DateTime  
 
-APP_BASE_URL = os.getenv("https://cancerlab.up.railway.app", "http://localhost:8501")  # defina no deploy
-SMTP_HOST = os.getenv("smtp.gmail.com")
+APP_BASE_URL = os.getenv("APP_BASE_URL", "https://cancerlab.up.railway.app")  # default já em prod
+SMTP_HOST = os.getenv("SMTP_HOST", "smtp.gmail.com")
 SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
-SMTP_USER = os.getenv("SMTP_USER")  # valor vem da variável do Railway
-SMTP_PASS = os.getenv("SMTP_PASS")  # valor vem da variável do Railway
-FROM_EMAIL = os.getenv("FROM_EMAIL", SMTP_USER or "no-reply@cancerlabsuporte")
+SMTP_USER = os.getenv("SMTP_USER")
+SMTP_PASS = os.getenv("SMTP_PASS")
+FROM_EMAIL = os.getenv("FROM_EMAIL", SMTP_USER or "no-reply@cancerlab.app")
+
 
 # --- Configuração da Página ---
 st.set_page_config(page_title="Banco de Dados - Cancer Lab", layout="centered")
@@ -247,7 +248,32 @@ if "page" not in st.session_state:
 if "usuario_logado" not in st.session_state:
     st.session_state.usuario_logado = None
 
+# 🔹 ADD – ler query params para deep-link (reset)
+try:
+    params = st.query_params  # Streamlit >= 1.32
+except Exception:
+    params = st.experimental_get_query_params()  # fallback
 
+if "page" in params and isinstance(params["page"], (list, tuple)):
+    qp_page = params["page"][0]
+else:
+    qp_page = params.get("page")
+
+if qp_page in {"reset_request", "reset"}:
+    st.session_state.page = qp_page
+
+# Guardar token vindo pela URL (se houver)
+if "reset_token" not in st.session_state:
+    st.session_state.reset_token = None
+
+qp_token = None
+if "token" in params and isinstance(params["token"], (list, tuple)):
+    qp_token = params["token"][0]
+else:
+    qp_token = params.get("token")
+
+if qp_token:
+    st.session_state.reset_token = qp_token
 
 # ---- PÁGINA DE LOGIN ----
 if st.session_state.page == "login":
@@ -279,32 +305,6 @@ if st.session_state.page == "login":
     if st.button("Criar conta"):
         st.session_state.page = "criar_conta"
         st.rerun()
-# 🔹 ADD – ler query params para deep-link (reset)
-try:
-    params = st.query_params  # Streamlit >= 1.32
-except Exception:
-    params = st.experimental_get_query_params()  # fallback
-
-if "page" in params and isinstance(params["page"], (list, tuple)):
-    qp_page = params["page"][0]
-else:
-    qp_page = params.get("page")
-
-if qp_page in {"reset_request", "reset"}:
-    st.session_state.page = qp_page
-
-# Guardar token vindo pela URL (se houver)
-if "reset_token" not in st.session_state:
-    st.session_state.reset_token = None
-
-qp_token = None
-if "token" in params and isinstance(params["token"], (list, tuple)):
-    qp_token = params["token"][0]
-else:
-    qp_token = params.get("token")
-
-if qp_token:
-    st.session_state.reset_token = qp_token
 
 # ---- PÁGINA DE CRIAÇÃO DE CONTA ----
 elif st.session_state.page == "criar_conta":
@@ -787,3 +787,4 @@ elif st.session_state.page == "clinicos":
                 st.success("Novo paciente cadastrado!")
 
     
+
