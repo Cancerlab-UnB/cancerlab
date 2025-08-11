@@ -16,12 +16,12 @@ import smtplib
 from email.message import EmailMessage
 from sqlalchemy import DateTime  
 
-APP_BASE_URL = os.getenv("APP_BASE_URL", "https://cancerlab.up.railway.app")  # default já em prod
-SMTP_HOST = os.getenv("SMTP_HOST", "smtp.gmail.com")
-SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
-SMTP_USER = os.getenv("SMTP_USER")
-SMTP_PASS = os.getenv("SMTP_PASS")
-FROM_EMAIL = os.getenv("FROM_EMAIL", SMTP_USER or "no-reply@cancerlab.app")
+APP_BASE_URL = os.getenv("APP_BASE_URL", "https://cancerlab.up.railway.app")
+SMTP_HOST    = os.getenv("SMTP_HOST", "smtp.gmail.com")
+SMTP_PORT    = int(os.getenv("SMTP_PORT", "587"))
+SMTP_USER    = os.getenv("SMTP_USER")
+SMTP_PASS    = (os.getenv("SMTP_PASS") or "").replace(" ", "")  # remove espaços por segurança
+FROM_EMAIL   = os.getenv("FROM_EMAIL", SMTP_USER or "suporte.cancerlab@gmail.com")
 
 
 # --- Configuração da Página ---
@@ -118,26 +118,33 @@ def update_user_password(user_id: int, new_password: str):
             .values(senha=hashed)
         )
 
-def send_password_reset_email(to_email: str, reset_url: str):
-    if not (SMTP_HOST and SMTP_USER and SMTP_PASS):
-        # Fallback visível no dev para você copiar o link
-        st.info(f"[DEV] Configure SMTP_HOST/SMTP_USER/SMTP_PASS/FROM_EMAIL. Link de reset: {reset_url}")
-        return
-
+def send_password_reset_email(to_email: str, reset_url: str) -> bool:
     msg = EmailMessage()
     msg["Subject"] = "Recuperação de senha - CancerLab"
     msg["From"] = FROM_EMAIL
     msg["To"] = to_email
     msg.set_content(
-        f"Olá!\n\nRecebemos uma solicitação para redefinir sua senha.\n\n"
-        f"Clique no link abaixo (válido por 60 minutos):\n{reset_url}\n\n"
-        "Se você não solicitou, ignore este e-mail.\n"
+        f"Olá!\n\nClique para redefinir sua senha (válido por 60 minutos):\n{reset_url}\n\n"
+        "Se não foi você, ignore este e-mail."
     )
-
-    with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
-        server.starttls()
-        server.login(SMTP_USER, SMTP_PASS)
-        server.send_message(msg)
+    try:
+        # 587 + STARTTLS
+        with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=20) as s:
+            s.ehlo(); s.starttls(); s.ehlo()
+            s.login(SMTP_USER, SMTP_PASS)
+            s.send_message(msg)
+        return True
+    except smtplib.SMTPAuthenticationError:
+        # fallback 465 + SSL
+        try:
+            with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=20) as s:
+                s.login(SMTP_USER, SMTP_PASS)
+                s.send_message(msg)
+            return True
+        except Exception:
+            return False
+    except Exception:
+        return False
 
 # --- Verificar se matrícula já existe ---
 def usuario_existe(CPF):
@@ -787,4 +794,5 @@ elif st.session_state.page == "clinicos":
                 st.success("Novo paciente cadastrado!")
 
     
+
 
