@@ -21,7 +21,7 @@ SMTP_HOST    = os.getenv("SMTP_HOST", "smtp.gmail.com")
 SMTP_PORT    = int(os.getenv("SMTP_PORT", "587"))
 SMTP_USER    = os.getenv("SMTP_USER")
 SMTP_PASS    = (os.getenv("SMTP_PASS") or "").replace(" ", "")  # remove espaços por segurança
-FROM_EMAIL   = os.getenv("FROM_EMAIL", SMTP_USER or "suporte.cancerlab@gmail.com")
+FROM_EMAIL = SMTP_USER
 
 
 # --- Configuração da Página ---
@@ -358,9 +358,12 @@ elif st.session_state.page == "reset_request":
             else:
                 token = create_reset_token(user_id=user["id"], ttl_minutes=60)
                 reset_url = f"{APP_BASE_URL}/?page=reset&token={token}"
-                send_password_reset_email(email_rec, reset_url)
-                st.success("Se o e-mail existir em nossa base, você receberá um link para redefinir a senha em instantes.")
-                st.info("Verifique também a caixa de spam/lixo eletrônico.")
+                ok = send_password_reset_email(email_rec, reset_url)
+                if ok:
+                    st.success("Link enviado! Veja também a caixa de spam/lixo.")
+                else:
+                    st.error("Falha ao enviar o e-mail. Verifique SMTP_USER/SMTP_PASS e tente novamente.")
+
     if st.button("Voltar para login"):
         st.session_state.page = "login"
         st.rerun()
@@ -794,5 +797,6 @@ elif st.session_state.page == "clinicos":
                 st.success("Novo paciente cadastrado!")
 
     
+
 
 
