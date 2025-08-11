@@ -19,9 +19,9 @@ from sqlalchemy import DateTime
 APP_BASE_URL = os.getenv("APP_BASE_URL", "https://cancerlab.up.railway.app")
 SMTP_HOST    = os.getenv("SMTP_HOST", "smtp.gmail.com")
 SMTP_PORT    = int(os.getenv("SMTP_PORT", "587"))
-SMTP_USER    = os.getenv("SMTP_USER")
-SMTP_PASS    = (os.getenv("SMTP_PASS") or "").replace(" ", "")  # remove espaços por segurança
-FROM_EMAIL = SMTP_USER
+SMTP_USER    = (os.getenv("SMTP_USER") or "").strip()
+SMTP_PASS    = (os.getenv("SMTP_PASS") or "").replace(" ", "").strip()
+FROM_EMAIL   = SMTP_USER
 
 
 # --- Configuração da Página ---
@@ -797,6 +797,7 @@ elif st.session_state.page == "clinicos":
                 st.success("Novo paciente cadastrado!")
 
     
+
 
 
 
