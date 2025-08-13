@@ -223,11 +223,11 @@ st.markdown("""
 st.markdown("""
     <style>
     body, .stApp {
-        background: linear-gradient(120deg, #101524 0%, #182233 100%) !important;
-        color: #F8F8F8;
+        background: white !important;
+        color: black !important;
     }
     .stButton > button {
-        background: linear-gradient(90deg, #33b6ea 10%, #47d16c 90%);
+        background: #005A90;
         color: white;
         border-radius: 1rem;
         padding: 0.75rem 2rem;
@@ -238,8 +238,13 @@ st.markdown("""
         transition: 0.2s;
     }
     .stButton > button:hover {
-        filter: brightness(1.15);
+        background: #0077C0; /* tom mais claro no hover */
         cursor: pointer;
+    }
+    /* Ajustar inputs e selects para fundo claro */
+    .stTextInput > div > input, .stSelectbox > div > div {
+        background-color: white !important;
+        color: black !important;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -797,6 +802,7 @@ elif st.session_state.page == "clinicos":
                 st.success("Novo paciente cadastrado!")
 
     
+
 
 
 
