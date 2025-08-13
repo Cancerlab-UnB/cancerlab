@@ -227,7 +227,7 @@ st.markdown("""
   --bg: #F3F9FB;           /* fundo da página */
   --text: #111827;         /* texto padrão */
   --muted: #1F2A37;        /* rótulos/legendas */
-  --primary: #005A90;      /* azul institucional */
+  --primary: #173975;      /* azul institucional */
   --primary-hover: #0A74B7;
   --input-bg: #EDF2F7;     /* fundo dos inputs/select */
   --input-text: #111827;   /* texto digitado */
@@ -902,6 +902,7 @@ elif st.session_state.page == "clinicos":
                 st.success("Novo paciente cadastrado!")
 
     
+
 
 
 
