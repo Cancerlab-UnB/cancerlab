@@ -222,10 +222,30 @@ st.markdown("""
 
 st.markdown("""
     <style>
+    /* Fundo levemente acinzentado */
     body, .stApp {
-        background: white !important;
+        background-color: #EDFFFF !important;
         color: black !important;
     }
+
+    /* Inputs mais claros */
+    .stTextInput > div > div > input, 
+    .stPassword > div > div > input, 
+    .stSelectbox > div > div {
+        background-color: #212626 !important; /* tom claro */
+        color: black !important;
+        border-radius: 0.5rem;
+        border: 1px solid #ccc;
+        padding: 0.5rem;
+    }
+
+    /* Cor do título mais escura */
+    .header-lab-text {
+        color: #005A90 !important; /* azul escuro da identidade visual */
+        text-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    /* Botões mais escuros */
     .stButton > button {
         background: #005A90;
         color: white;
@@ -238,16 +258,12 @@ st.markdown("""
         transition: 0.2s;
     }
     .stButton > button:hover {
-        background: #0077C0; /* tom mais claro no hover */
+        background: #0077C0; /* azul um pouco mais claro no hover */
         cursor: pointer;
-    }
-    /* Ajustar inputs e selects para fundo claro */
-    .stTextInput > div > input, .stSelectbox > div > div {
-        background-color: white !important;
-        color: black !important;
     }
     </style>
 """, unsafe_allow_html=True)
+
 
     
 
@@ -802,6 +818,7 @@ elif st.session_state.page == "clinicos":
                 st.success("Novo paciente cadastrado!")
 
     
+
 
 
 
