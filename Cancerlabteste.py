@@ -351,7 +351,6 @@ div[data-testid="stNotificationContent"]{
 .stFormSubmitButton > button:hover {
   background: var(--primary-hover) !important;
 }
-<style>
 /* Força estilos legíveis em TODOS os alerts nativos do Streamlit */
 .stAlert, .stAlert > div[role="alert"] {
   box-shadow: none !important;
@@ -993,6 +992,7 @@ elif st.session_state.page == "clinicos":
                 st.success("Novo paciente cadastrado!")
 
     
+
 
 
 
