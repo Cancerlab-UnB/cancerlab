@@ -4,3 +4,4 @@ psycopg2-binary
 bcrypt
 openpyxl
 pandas
+requests>=2.31,<3
