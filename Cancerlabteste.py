@@ -524,7 +524,7 @@ def page_people():
                      "PhD Candidate in Medical Sciences (Molecular Pathology of Colorectal Cancer), University of Brasília"], "email": "", "institution": "University of Brasília",
          "lattes": "http://lattes.cnpq.br/6330213791982657", "orcid": "https://orcid.org/0000-0002-3691-3739"},
         {"name": "Flávio de Alencar Teles Barreto, MSc", "role": "PhD Student",
-         "photo": "Flavio.jpg", "bio": "Master’s graduate and current PhD candidate in Medical Sciences at the University of Brasília, focused on the molecular pathology of colorectal cancer. Holds a Biomedicine degree (UniCEUB, 2017) and a specialization in Imaging from Hospital Israelita Albert Einstein (2019). Qualified in clinical analysis, molecular biology, and imaging. Currently works in the Radiology Department (CT unit) at Hospital Sírio-Libanês in Brasília",
+         "photo": "flavio.jpg", "bio": "Master’s graduate and current PhD candidate in Medical Sciences at the University of Brasília, focused on the molecular pathology of colorectal cancer. Holds a Biomedicine degree (UniCEUB, 2017) and a specialization in Imaging from Hospital Israelita Albert Einstein (2019). Qualified in clinical analysis, molecular biology, and imaging. Currently works in the Radiology Department (CT unit) at Hospital Sírio-Libanês in Brasília",
          "degrees": ["BSc in Biomedicine, Centro Universitário de Brasília (2017)",
                      "Postgraduate Specialization in Imaging (Imagenologia), Hospital Israelita Albert Einstein (2019)",
                      "MSc in Medical Sciences (Molecular Pathology of Colorectal Cancer), University of Brasília",
@@ -1964,6 +1964,7 @@ elif st.session_state.page == "clinicos":
                 st.success("Novo paciente cadastrado!")
 
     
+
 
 
 
