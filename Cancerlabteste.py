@@ -841,21 +841,21 @@ def page_partners():
             "summary": "CEO, i.rad.Particles; researcher at ICESP (Translational Oncology). Former PqC-VI at LIM-43 HC-FMUSP; collaborations with Columbia University and MSKCC (Grimm Lab). Focus: molecular imaging (fluorescence, RSOM, micro-PET/SPECT/CT), biomaterials, extracellular vesicles/membrane particles; prostate cancer. Degrees: B.Sc., M.Sc., Ph.D. (UNICAMP); postdocs at USP and MSKCC"
         },
         {
-            "name": "Giselle Cerchiaro",
+            "name": "Giselle Cerchiaro, PhD",
             "website": "http://lattes.cnpq.br/0764162939581973",
             "logo": "gc.jpg",
             "country": "UFABC - Brazil",
             "summary": "Full Professor (UFABC). Biochemistry of trace metals (Cu/Fe/Zn), copper bioinorganic chemistry, ROS & cell signaling, copper-based therapeutics, neurodegeneration/metal homeostasis, metal-chelation nutraceuticals, oxidative stress, and cell-cycle changes. Degrees: B.Sc. UNICAMP; Ph.D. USP; visiting fellow, Rome Tor Vergata; 2019 visiting researcher in Rome"
         },
         {
-            "name": "Sergio Augusto Lopes de Souza",
+            "name": "Sergio Augusto Lopes de Souza, PhD",
             "website": "http://lattes.cnpq.br/6829155093609377",
             "logo": "sa.jpg",
             "country": "UFRJ - Brazil",
             "summary": "Associate Professor & Chair of Radiology (UFRJ); CNPq Productivity Fellow; FAPERJ “Scientist of Our State.” Nuclear Medicine specialist focusing on 99mTc/^131I/^18F-labeled cells and molecules for diagnostics and translational research in oncology, renal transplantation, rheumatology, infectious diseases, and cell therapy; SBMN/SBBN member and SBMN rep to ALASBIMN CE committee"
         },
         {
-            "name": "Frederico Pittella Silva",
+            "name": "Frederico Pittella Silva, PhD",
             "website": "http://lattes.cnpq.br/1840687382026247",
             "logo": "fp.jpg",
             "country": "UFJF - Brazil",
@@ -1964,6 +1964,7 @@ elif st.session_state.page == "clinicos":
                 st.success("Novo paciente cadastrado!")
 
     
+
 
 
 
