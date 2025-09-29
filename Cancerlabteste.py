@@ -1125,8 +1125,8 @@ def page_people():
     # Manually maintained list (no spreadsheet import)
     ALUMINI = [
         # Examples — duplicate/edit as needed
-         {"name": "Athos Silva Oliveira", "lattes": "http://lattes.cnpq.br/5665031794527967", "year": "2023", "activity": "Postdoctoral Fellowsc"},
-         {"name": "Vívian D'Afonseca da Silva Ferreira", "lattes": "", "year": "2015", "activity": "Postdoctoral Fellows"},
+         {"name": "Athos Silva Oliveira", "lattes": "http://lattes.cnpq.br/5665031794527967", "year": "2023", "activity": "Postdoctoral Fellows"},
+         {"name": "Vívian D'Afonseca da Silva Ferreira", "lattes": "http://lattes.cnpq.br/6228921073127080", "year": "2015", "activity": "Postdoctoral Fellows"},
          {"name": "Doralina do Amaral Rabello Ramos", "lattes": "http://lattes.cnpq.br/4636606799429977", "year": "2011", "activity": "Postdoctoral Fellows"},
          {"name": "Luís Henrique Toshihiro Sakamoto", "lattes": "http://lattes.cnpq.br/9517030460820076", "year": "2014", "activity": "Ph.D."},
          {"name": "João Nunes de Mattos Neto", "lattes": "http://lattes.cnpq.br/8975088486815463", "year": "2015", "activity": "Ph.D."},
@@ -2689,6 +2689,7 @@ elif st.session_state.page == "clinicos":
                 st.success("Novo paciente cadastrado!")
 
     
+
 
 
 
