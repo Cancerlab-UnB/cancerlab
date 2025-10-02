@@ -1435,7 +1435,7 @@ def page_publications():
          "journal": "Clinical Chemistry", "year": 2020},
 
         # ---- NEW links you sent (years inferred from the urls) ----
-        {"authors": "Doralina do Amaral Rabello, Carolina Amaro de Moura, Rosangela Vieira de Andrade, Andrea Barretto Motoyama, Fabio Pittella Silva", "title": "Altered expression of MLL methyltransferase family genes in breast cancer)", "journal": "International Journal of Oncology",
+        {"authors": "Doralina do Amaral Rabello, Carolina Amaro de Moura, Rosangela Vieira de Andrade, Andrea Barretto Motoyama, Fabio Pittella Silva", "title": "Altered expression of MLL methyltransferase family genes in breast cancer", "journal": "International Journal of Oncology",
          "year": 2013, "url": "https://www.spandidos-publications.com/10.3892/ijo.2013.1981",
          "doi": "10.3892/ijo.2013.1981"},
         {"authors": "Luis Henrique Toshihiro Sakamoto a c d, Rosangela Vieira de Andrade b, Maria Sueli Soares Felipe b c, Andrea Barretto Motoyama, Fabio Pittella Silva", "title": "SMYD2 is highly expressed in pediatric acute lymphoblastic leukemia and constitutes a bad prognostic factor", "journal": "",
@@ -3637,6 +3637,7 @@ elif st.session_state.page == "clinicos":
                 st.success("Novo paciente cadastrado!")
 
     
+
 
 
 
