@@ -601,8 +601,13 @@ def show_anniversary_cta(
     box-shadow:0 10px 24px rgba(2,6,23,.14);
     text-decoration:none; transition:transform .12s ease, box-shadow .12s ease;
   }}
-  .{uid}-pill:hover {{ transform:translateY(-1px); box-shadow:0 14px 28px rgba(2,6,23,.18); }}
-
+    .{uid}-pill{
+      /* ...existing styles... */
+      color:#fff !important;           /* <- make the text white */
+    }
+    .{uid}-pill:link,
+    .{uid}-pill:visited,
+    .{uid}-pill * { color:#fff !important; }  /* ensure any child spans/strongs also render white */
   #{uid}-toggle {{ display:none; }}
 
   .{uid}-modal {{
@@ -706,9 +711,6 @@ def show_anniversary_cta(
     <div class="{uid}-fx">
       <!-- lots of balloons -->
       <span class="{uid}-balloon" style="left:4%;  --bclr:#60a5fa; --spd:12s;"></span>
-      <span class="{uid}-balloon" style="left:10%; --bclr:#f97316; --spd:13s;"></span>
-      <span class="{uid}-balloon" style="left:16%; --bclr:#22c55e; --spd:11s;"></span>
-      <span class="{uid}-balloon" style="left:24%; --bclr:#a78bfa; --spd:12s;"></span>
       <span class="{uid}-balloon" style="left:32%; --bclr:#f43f5e; --spd:10.5s;"></span>
       <span class="{uid}-balloon" style="left:48%; --bclr:#60a5fa; --spd:11.5s;"></span>
       <span class="{uid}-balloon" style="left:58%; --bclr:#22c55e; --spd:12.5s;"></span>
@@ -716,14 +718,6 @@ def show_anniversary_cta(
       <span class="{uid}-balloon" style="left:74%; --bclr:#a78bfa; --spd:12.8s;"></span>
       <span class="{uid}-balloon" style="left:82%; --bclr:#f43f5e; --spd:11.2s;"></span>
       <span class="{uid}-balloon" style="left:90%; --bclr:#60a5fa; --spd:13.2s;"></span>
-      <i class="{uid}-fw"        style="--x:18vw; --y:28vh; --clr:#f59e0b; --dur:1.7s;"></i>
-      <i class="{uid}-fw small"  style="--x:30vw; --y:18vh; --clr:#22c55e; --dur:1.6s;"></i>
-      <i class="{uid}-fw"        style="--x:46vw; --y:22vh; --clr:#60a5fa; --dur:1.9s;"></i>
-      <i class="{uid}-fw small"  style="--x:62vw; --y:16vh; --clr:#a855f7; --dur:1.5s;"></i>
-      <i class="{uid}-fw"        style="--x:72vw; --y:30vh; --clr:#f43f5e; --dur:1.8s;"></i>
-      <i class="{uid}-fw small"  style="--x:84vw; --y:24vh; --clr:#22c55e; --dur:1.7s;"></i>
-      <i class="{uid}-fw"        style="--x:38vw; --y:34vh; --clr:#f59e0b; --dur:2.0s;"></i>
-      <i class="{uid}-fw small"  style="--x:54vw; --y:40vh; --clr:#60a5fa; --dur:1.6s;"></i>
     </div>
     <!-- Card (no header text) -->
     <div class="{uid}-card">
@@ -3658,6 +3652,7 @@ elif st.session_state.page == "clinicos":
                 st.success("Novo paciente cadastrado!")
 
     
+
 
 
 
