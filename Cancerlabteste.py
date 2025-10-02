@@ -601,9 +601,7 @@ def show_anniversary_cta(
     box-shadow:0 10px 24px rgba(2,6,23,.14);
     text-decoration:none; transition:transform .12s ease, box-shadow .12s ease;
   }}
-    .{uid}-pill{
-      /* ...existing styles... */
-      color:#fff !important;           /* <- make the text white */
+    .{uid}-pill{color:#fff !important;
     }
     .{uid}-pill:link,
     .{uid}-pill:visited,
@@ -3652,6 +3650,7 @@ elif st.session_state.page == "clinicos":
                 st.success("Novo paciente cadastrado!")
 
     
+
 
 
 
