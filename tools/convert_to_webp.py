@@ -7,7 +7,7 @@ CANDIDATES = [
     "imghome1.jpg",
     "imghome2.jpg",
     "landmarks.jpg",
-    "static/imgfront.jpg",
+    "static/imgfront.png",
     "static/anniversary13.jpg",
     # adicione mais caminhos se quiser...
 ]
