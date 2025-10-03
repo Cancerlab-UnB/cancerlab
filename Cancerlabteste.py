@@ -471,7 +471,7 @@ def _set_param(**kwargs):
         
 def show_front_strip(
     caption: str = "Welcome to the lab — advancing genomics & ctDNA",
-    image_relpath: str = "static/imgfront"   # auto-detect ext
+    image_relpath: str = "static/imgfront.webp",   # auto-detect ext
 ):
     p = Path(image_relpath)
     if not p.suffix:
@@ -2995,7 +2995,7 @@ active_nav = _get_param("page", "home")
 if isinstance(active_nav, (list, tuple)):   # <- defensivo, caso venha lista
     active_nav = active_nav[0]
 show_lab_header(
-    image_relpath="static/imgfront",
+    image_relpath: str = "static/imgfront.webp",
     address_lines=[
         "Laboratory of Molecular Pathology of Cancer",
         "Faculty of Health Sciences",
@@ -3650,6 +3650,7 @@ elif st.session_state.page == "clinicos":
                 st.success("Novo paciente cadastrado!")
 
     
+
 
 
 
