@@ -93,18 +93,23 @@ if __name__ == "__main__":
 from pathlib import Path
 
 
+from pathlib import Path
+import mimetypes
+
 def prefer_webp(path_or_rel: str) -> str:
-    """Se existir .webp equivalente, usa; senão, mantém o original."""
     p = Path(path_or_rel)
     if not p.is_absolute():
         p = (Path(__file__).parent / p).resolve()
     webp = p.with_suffix(".webp")
     return str(webp if webp.exists() else p)
 
-def cached_img_uri(path_or_rel: str) -> str:
-    """Gera data:URI com MIME correto, usando cache interno."""
+def cached_img_uri(path_or_rel: str, mime: str | None = None) -> str:
+    """
+    Retorna data:URI para a imagem, preferindo .webp se existir.
+    Aceita mime opcional; se não vier, deduz pelo sufixo do arquivo.
+    """
     p = Path(prefer_webp(path_or_rel))
-    mime = mimetypes.guess_type(str(p))[0] or "image/webp"
+    mime = mime or (mimetypes.guess_type(str(p))[0] or "image/webp")
     return data_uri_cached(str(p), mime=mime)
 
 
@@ -3717,6 +3722,7 @@ elif st.session_state.page == "clinicos":
                 st.success("Novo paciente cadastrado!")
 
     
+
 
 
 
