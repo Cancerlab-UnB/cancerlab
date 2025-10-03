@@ -673,7 +673,7 @@ def render_navbar(active: str = "home", unbimg: str | None = None):
 
 def show_anniversary_cta(
     image_relpath: str = "static/anniversary13.jpg",
-    caption: str = "🎈 13 years of scientific innovation!",
+    caption: str = "🎈 13 years of scientific innovation",
 ):
     import base64, uuid, mimetypes
     from pathlib import Path
@@ -684,21 +684,15 @@ def show_anniversary_cta(
     def _get_params():
         try:  # >= 1.32
             qp = st.query_params
-            # forçam str (se vier lista, pega o último)
-            out = {k: (qp.get(k, None) if not isinstance(qp.get(k, None), list) else qp.get(k)[-1]) for k in qp}
+            out = {k: (qp.get(k) if not isinstance(qp.get(k), list) else qp.get(k)[-1]) for k in qp}
         except Exception:  # legacy
             qp = st.experimental_get_query_params()
-            out = {k: (qp[k][-1] if isinstance(qp[k], list) and qp[k] else qp[k]) for k in qp}
+            out = {k: (v[-1] if isinstance(v, list) else v) for k, v in qp.items()}
         return {k: v for k, v in out.items() if v is not None}
 
     params = _get_params()
     if params.get("dismiss_anniv") == "1":
         return  # não renderiza o popup se já foi fechado
-
-    # ---- gerar URL de fechar preservando parâmetros existentes ----
-    new_params = dict(params)
-    new_params["dismiss_anniv"] = "1"
-    close_url = "?" + urlencode(new_params, doseq=True)
 
     # ---- util img -> data URI (reusa seu cached_img_uri se existir) ----
     def _img_uri(p: Path) -> str:
@@ -716,62 +710,56 @@ def show_anniversary_cta(
     data = _img_uri(p)
     uid  = f"anni{uuid.uuid4().hex[:7]}"
 
+    # monta inputs hidden mantendo os params atuais + dismiss_anniv=1
+    hidden_inputs = "\n".join(
+        f'<input type="hidden" name="{k}" value="{v}"/>'
+        for k, v in params.items()
+        if k != "dismiss_anniv"
+    )
+    hidden_inputs += '\n<input type="hidden" name="dismiss_anniv" value="1"/>'
+
     st.markdown(
         f"""
 <style>
   :root {{
     --anni-accent: var(--bar-bg, #3f5eb5);
-    --anni-ink: #0f172a;
-    --anni-line: #e6eaf2;
+    --anni-ink: #0f172a; --anni-line: #e6eaf2;
   }}
-
-  /* ===== Overlay fixo ===== */
   .{uid}-modal {{
-    position: fixed; inset: 0; z-index: 4000;
-    display: grid; place-items: center;
+    position: fixed; inset:0; z-index: 4000;
+    display:grid; place-items:center;
   }}
-  .{uid}-backdrop {{
-    position:absolute; inset:0;
-    background: rgba(2,6,23,.28);
+  .{uid}-backdrop-btn {{
+    position:absolute; inset:0; border:none; background: rgba(2,6,23,.28);
     backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px);
+    cursor:pointer;
   }}
-
-  /* ===== Cartão ===== */
   .{uid}-card {{
-    position: relative;
-    width: min(92vw, 720px);
-    background: #fff; color: var(--anni-ink);
-    border: 1px solid var(--anni-line);
-    border-radius: 18px; overflow: hidden;
-    box-shadow: 0 22px 48px rgba(2,6,23,.22);
-    transform: translateY(12px) scale(.985);
-    animation: {uid}-pop .24s ease forwards;
+    position:relative; width:min(92vw, 720px);
+    background:#fff; color:var(--anni-ink);
+    border:1px solid var(--anni-line); border-radius:18px; overflow:hidden;
+    box-shadow:0 22px 48px rgba(2,6,23,.22);
+    transform:translateY(12px) scale(.985); animation:{uid}-pop .24s ease forwards;
   }}
-  @keyframes {uid}-pop {{
-    to {{ transform: translateY(0) scale(1); }}
-  }}
-  .{uid}-close {{
-    position: absolute; right: 12px; top: 12px;
-    width: 36px; height: 36px; border-radius: 999px;
-    display: inline-flex; align-items:center; justify-content:center;
-    text-decoration: none;
-    background: #fff; border: 1px solid var(--anni-line); cursor: pointer;
-    box-shadow: 0 8px 16px rgba(2,6,23,.12);
-    font-weight: 900; color: var(--anni-ink);
+  @keyframes {uid}-pop {{ to {{ transform:translateY(0) scale(1); }} }}
+  .{uid}-close-btn {{
+    position:absolute; right:12px; top:12px; width:36px; height:36px; border-radius:999px;
+    display:inline-flex; align-items:center; justify-content:center;
+    background:#fff; border:1px solid var(--anni-line);
+    box-shadow:0 8px 16px rgba(2,6,23,.12);
+    font-weight:900; color:var(--anni-ink); cursor:pointer;
   }}
   .{uid}-head {{
-    padding: 14px 18px 0 18px;
-    font-weight: 800; letter-spacing:.2px;
-    color: var(--anni-accent);
+    padding:14px 18px 0 18px; font-weight:800; letter-spacing:.2px; color:var(--anni-accent);
     font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
   }}
-  .{uid}-body {{ padding: 10px 18px 18px 18px; }}
+  .{uid}-body {{ padding:10px 18px 18px 18px; }}
   .{uid}-img {{
     display:block; width:100%; height:auto; max-height:72vh; object-fit:contain;
     border-radius:12px; border:1px solid var(--anni-line);
-    box-shadow: 0 10px 24px rgba(2,6,23,.08);
+    box-shadow:0 10px 24px rgba(2,6,23,.08);
   }}
-  /* ===== Balões ===== */
+  /* Balões */
   .{uid}-balloons {{ position:absolute; inset:0; overflow:hidden; pointer-events:none; }}
   .{uid}-balloon {{
     position:absolute; bottom:-20vh; width:36px; height:48px; border-radius:50% 50% 45% 55%;
@@ -797,7 +785,7 @@ def show_anniversary_cta(
   .{uid}-b4 {{ left:60%; animation-duration: 10.5s; animation-delay: -4s; }}
   .{uid}-b5 {{ left:75%; animation-duration: 9s; animation-delay: -1.5s; }}
   .{uid}-b6 {{ left:88%; animation-duration: 12s; animation-delay: -3.5s; }}
-  /* ===== Fogos ===== */
+  /* Fogos */
   .{uid}-fireworks {{ position:absolute; inset:0; pointer-events:none; }}
   .{uid}-fw {{
     position:absolute; width:2px; height:2px; left:50%; top:50%;
@@ -812,10 +800,8 @@ def show_anniversary_cta(
       -14px 8px 0 2px rgba(153, 102, 255, .95),
       -16px 0 0 2px rgba(255, 88, 88, .95),
       -14px -8px 0 2px rgba(0, 214, 170, .95);
-    border-radius:50%;
-    transform: translate(-50%, -50%) scale(0.2);
-    opacity: 0;
-    animation: {uid}-boom 2.2s ease-out infinite;
+    border-radius:50%; transform: translate(-50%, -50%) scale(0.2);
+    opacity:0; animation:{uid}-boom 2.2s ease-out infinite;
   }}
   .{uid}-fw.fw2 {{ animation-delay: .8s; }}
   .{uid}-fw.fw3 {{ animation-delay: 1.6s; }}
@@ -834,9 +820,10 @@ def show_anniversary_cta(
     .{uid}-body {{ padding: 10px 12px 14px 12px; }}
   }}
 </style>
-<div class="{uid}-modal" role="dialog" aria-modal="true" aria-label="Pop-up de Aniversário">
-  <!-- backdrop clicável: fecha via URL -->
-  <a class="{uid}-backdrop" href="{close_url}" aria-hidden="true"></a>
+<form method="get" class="{uid}-modal" role="dialog" aria-modal="true" aria-label="Pop-up de Aniversário">
+  {hidden_inputs}
+  <!-- backdrop clicável que envia o form (fecha) -->
+  <button class="{uid}-backdrop-btn" type="submit" aria-hidden="true"></button>
   <!-- camadas decorativas -->
   <div class="{uid}-balloons">
     <div class="{uid}-balloon {uid}-b1"></div>
@@ -853,16 +840,17 @@ def show_anniversary_cta(
   </div>
   <!-- cartão -->
   <div class="{uid}-card">
-    <a href="{close_url}" class="{uid}-close" title="Fechar">✕</a>
+    <button class="{uid}-close-btn" type="submit" title="Fechar">✕</button>
     <div class="{uid}-head">{caption}</div>
     <div class="{uid}-body">
       <img class="{uid}-img" src="{data}" alt="Aniversário CancerLab" loading="eager" decoding="async" />
     </div>
   </div>
-</div>
+</form>
         """,
         unsafe_allow_html=True,
     )
+
 
 
 
@@ -3781,6 +3769,7 @@ elif st.session_state.page == "clinicos":
                 st.success("Novo paciente cadastrado!")
 
     
+
 
 
 
