@@ -671,62 +671,179 @@ def render_navbar(active: str = "home", unbimg: str | None = None):
 
 
 
-
-def show_anniversary_cta(
+def show_anniversary_popup_fixed(
     image_relpath: str = "static/anniversary13.jpg",
-    label: str = "🎈 13 years of scientific innovation!",
+    caption: str = "🎈 13 years of scientific innovation!",
 ):
+    import base64, uuid, mimetypes
+    from pathlib import Path
+    import streamlit as st
+
+    # === util: tenta usar cached_img_uri do seu projeto; senão, gera data URI local ===
+    def _img_uri(p: Path) -> str:
+        try:
+            # se você já tem cached_img_uri no projeto
+            return cached_img_uri(str(p))  # type: ignore[name-defined]
+        except Exception:
+            mime = mimetypes.guess_type(str(p))[0] or "image/jpeg"
+            b64 = base64.b64encode(p.read_bytes()).decode()
+            return f"data:{mime};base64,{b64}"
+
     p = Path(image_relpath)
     if not p.exists():
         return
 
-    # usa cache + prefere .webp
-    data = cached_img_uri(str(p))
-    uid  = f"anni{uuid.uuid4().hex[:6]}"
+    data = _img_uri(p)
+    uid  = f"anni{uuid.uuid4().hex[:7]}"
 
     st.markdown(
         f"""
 <style>
   :root {{
     --anni-accent: var(--bar-bg, #3f5eb5);
-    --anni-ink: #0f172a; --anni-line: #e6eaf2;
+    --anni-ink: #0f172a;
+    --anni-line: #e6eaf2;
   }}
-  .{uid}-wrap {{ display:flex; justify-content:center; margin:12px 0 18px;
-                 font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial; }}
-  .{uid}-pill {{
-    display:inline-flex; align-items:center; gap:10px; padding:10px 16px; border-radius:999px; cursor:pointer; user-select:none;
-    background: var(--anni-accent); color:#fff; font-weight:900; letter-spacing:.2px;
-    border:1px solid rgba(255,255,255,.55); box-shadow:0 10px 24px rgba(2,6,23,.14);
+
+  /* ===== base ===== */
+  .{uid}-modal {{
+    position: fixed; inset: 0; z-index: 4000;
+    display: grid; place-items: center;
   }}
-  #{uid}-toggle {{ display:none; }}
-  .{uid}-modal {{ position: fixed; inset:0; z-index: 4000; display:none; place-items:center; }}
-  #{uid}-toggle:checked ~ .{uid}-modal {{ display:grid; }}
-  .{uid}-backdrop {{ position:absolute; inset:0; background:rgba(2,6,23,.28); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px); }}
+  .{uid}-backdrop {{
+    position:absolute; inset:0;
+    background: rgba(2,6,23,.28);
+    backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px);
+  }}
+  /* ===== card ===== */
   .{uid}-card {{
-    position:relative; max-width:min(92vw, 680px); background:#fff; color:var(--anni-ink);
-    border:1px solid var(--anni-line); border-radius:16px; overflow:hidden;
-    box-shadow:0 22px 48px rgba(2,6,23,.22); transform:translateY(8px) scale(.99); transition:transform .18s ease;
+    position: relative;
+    width: min(92vw, 720px);
+    background: #fff; color: var(--anni-ink);
+    border: 1px solid var(--anni-line);
+    border-radius: 18px; overflow: hidden;
+    box-shadow: 0 22px 48px rgba(2,6,23,.22);
+    transform: translateY(12px) scale(.985);
+    animation: {uid}-pop .24s ease forwards;
   }}
-  #{uid}-toggle:checked ~ .{uid}-modal .{uid}-card {{ transform:translateY(0) scale(1); }}
+  @keyframes {uid}-pop {{
+    to {{ transform: translateY(0) scale(1); }}
+  }}
   .{uid}-close {{
-    position:absolute; right:10px; top:10px; width:32px; height:32px; border-radius:999px; cursor:pointer;
-    display:inline-flex; align-items:center; justify-content:center; background:#fff; border:1px solid var(--anni-line);
-    box-shadow:0 6px 14px rgba(2,6,23,.12); color:var(--anni-ink); font-weight:900;
+    position: absolute; right: 12px; top: 12px;
+    width: 36px; height: 36px; border-radius: 999px;
+    display: inline-flex; align-items:center; justify-content:center;
+    background: #fff; border: 1px solid var(--anni-line); cursor: pointer;
+    box-shadow: 0 8px 16px rgba(2,6,23,.12);
+    font-weight: 900;
   }}
-  .{uid}-body {{ padding:12px; }}
-  .{uid}-img {{ display:block; margin:0 auto; max-width:100%; max-height:70vh; width:auto; height:auto; object-fit:contain;
-                border-radius:12px; border:1px solid var(--anni-line); box-shadow:0 6px 18px rgba(2,6,23,.08); }}
+  .{uid}-head {{
+    padding: 14px 18px 0 18px;
+    font-weight: 800; letter-spacing:.2px;
+    color: var(--anni-accent);
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+  }}
+  .{uid}-body {{ padding: 10px 18px 18px 18px; }}
+  .{uid}-img {{
+    display:block; width:100%; height:auto; max-height:72vh; object-fit:contain;
+    border-radius:12px; border:1px solid var(--anni-line);
+    box-shadow: 0 10px 24px rgba(2,6,23,.08);
+  }}
+  /* ===== close via checkbox (default: aberto) ===== */
+  #{uid}-toggle {{ position: fixed; opacity:0; pointer-events:none; }}
+  /* quando DESmarcar (clicar no X), esconda tudo */
+  #{uid}-toggle:not(:checked) ~ .{uid}-modal {{ display: none; }}
+  /* ===== balloons ===== */
+  .{uid}-balloons {{
+    position:absolute; inset:0; overflow:hidden; pointer-events:none;
+  }}
+  .{uid}-balloon {{
+    position:absolute; bottom:-20vh; width:36px; height:48px; border-radius:50% 50% 45% 55%;
+    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.8) 0 14%, transparent 15%),
+                var(--anni-accent);
+    box-shadow: inset -6px -10px 18px rgba(0,0,0,.08);
+    animation: {uid}-float 9s linear infinite;
+  }}
+  .{uid}-balloon::after {{
+    content:""; position:absolute; left:50%; transform:translateX(-50%);
+    bottom:-22px; width:2px; height:28px; background: rgba(0,0,0,.18);
+  }}
+  @keyframes {uid}-float {{
+    0% {{ transform: translateY(0) translateX(0) rotate(1deg); }}
+    25% {{ transform: translateY(-20vh) translateX(-10px) rotate(-2deg); }}
+    50% {{ transform: translateY(-40vh) translateX(6px) rotate(2deg); }}
+    75% {{ transform: translateY(-60vh) translateX(-6px) rotate(-1deg); }}
+    100%{{ transform: translateY(-85vh) translateX(0) rotate(0deg); }}
+  }}
+  /* 6 balões com posições e delays diferentes */
+  .{uid}-b1 {{ left:10%; animation-duration: 10s; animation-delay: -1s; }}
+  .{uid}-b2 {{ left:25%; animation-duration: 9.5s; animation-delay: -3s; }}
+  .{uid}-b3 {{ left:40%; animation-duration: 11s; animation-delay: -2s; }}
+  .{uid}-b4 {{ left:60%; animation-duration: 10.5s; animation-delay: -4s; }}
+  .{uid}-b5 {{ left:75%; animation-duration: 9s; animation-delay: -1.5s; }}
+  .{uid}-b6 {{ left:88%; animation-duration: 12s; animation-delay: -3.5s; }}
+  /* ===== fireworks ===== */
+  .{uid}-fireworks {{ position:absolute; inset:0; pointer-events:none; }}
+  .{uid}-fw {{
+    position:absolute; width:2px; height:2px; left:50%; top:50%;
+    background: transparent;
+    box-shadow:
+      0 0 0 2px rgba(255,255,255,.0),
+      0 -16px 0 2px rgba(255, 214, 0, .95),
+      14px -8px 0 2px rgba(255, 102, 0, .95),
+      16px 0 0 2px rgba(0, 153, 255, .95),
+      14px 8px 0 2px rgba(0, 227, 150, .95),
+      0 16px 0 2px rgba(255, 0, 128, .95),
+      -14px 8px 0 2px rgba(153, 102, 255, .95),
+      -16px 0 0 2px rgba(255, 88, 88, .95),
+      -14px -8px 0 2px rgba(0, 214, 170, .95);
+    border-radius:50%;
+    transform: translate(-50%, -50%) scale(0.2);
+    opacity: 0;
+    animation: {uid}-boom 2.2s ease-out infinite;
+  }}
+  .{uid}-fw.fw2 {{ animation-delay: .8s; }}
+  .{uid}-fw.fw3 {{ animation-delay: 1.6s; }}
+  @keyframes {uid}-boom {{
+    0%   {{ opacity: 0; transform: translate(-50%, -50%) scale(0.2); }}
+    10%  {{ opacity: 1; transform: translate(-50%, -50%) scale(1); }}
+    50%  {{ opacity: .9; }}
+    100% {{ opacity: 0; transform: translate(-50%, -50%) scale(0.1); }}
+  }}
+  /* posiciona cada explosão em cantos diferentes */
+  .{uid}-fw.pos1 {{ left: 18%; top: 24%; }}
+  .{uid}-fw.pos2 {{ left: 82%; top: 22%; }}
+  .{uid}-fw.pos3 {{ left: 50%; top: 10%; }}
+  /* responsivo: reduz margem interna em telas pequenas */
+  @media (max-width: 540px) {{
+    .{uid}-head {{ padding-top: 12px; }}
+    .{uid}-body {{ padding: 10px 12px 14px 12px; }}
+  }}
 </style>
-<div class="{uid}-wrap">
-  <input id="{uid}-toggle" type="checkbox" />
-  <label for="{uid}-toggle" class="{uid}-pill">{label}</label>
-  <div class="{uid}-modal" role="dialog" aria-modal="true">
-    <label class="{uid}-backdrop" for="{uid}-toggle" aria-hidden="true"></label>
-    <div class="{uid}-card">
-      <label for="{uid}-toggle" class="{uid}-close" title="Close">✕</label>
-      <div class="{uid}-body">
-        <img class="{uid}-img" src="{data}" alt="CancerLab anniversary" loading="lazy" decoding="async">
-      </div>
+<!-- toggle invisível: marcado por padrão => popup visível ao carregar -->
+<input id="{uid}-toggle" type="checkbox" checked />
+<div class="{uid}-modal" role="dialog" aria-modal="true" aria-label="Pop-up de Aniversário">
+  <div class="{uid}-backdrop"></div>
+  <!-- camadas de efeitos -->
+  <div class="{uid}-balloons">
+    <div class="{uid}-balloon {uid}-b1"></div>
+    <div class="{uid}-balloon {uid}-b2"></div>
+    <div class="{uid}-balloon {uid}-b3"></div>
+    <div class="{uid}-balloon {uid}-b4"></div>
+    <div class="{uid}-balloon {uid}-b5"></div>
+    <div class="{uid}-balloon {uid}-b6"></div>
+  </div>
+  <div class="{uid}-fireworks">
+    <div class="{uid}-fw pos1"></div>
+    <div class="{uid}-fw pos2 fw2"></div>
+    <div class="{uid}-fw pos3 fw3"></div>
+  </div>
+  <!-- cartão -->
+  <div class="{uid}-card">
+    <label for="{uid}-toggle" class="{uid}-close" title="Fechar">✕</label>
+    <div class="{uid}-head">{caption}</div>
+    <div class="{uid}-body">
+      <img class="{uid}-img" src="{data}" alt="Aniversário CancerLab" loading="eager" decoding="async" />
     </div>
   </div>
 </div>
@@ -3650,6 +3767,7 @@ elif st.session_state.page == "clinicos":
                 st.success("Novo paciente cadastrado!")
 
     
+
 
 
 
