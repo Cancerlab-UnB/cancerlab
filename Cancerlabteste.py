@@ -216,14 +216,14 @@ def show_help_widget(
           }}
 
           .help-root {{
-            position: sticky; right: 14px; bottom: 14px; z-index: 1100;
+            position: fixed; right: 14px; bottom: 14px; z-index: 1100;
             font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
           }}
           .help-toggle {{ display:none; }}
 
           /* --- MINI FLOATING BUTTON --- */
           .help-fab {{
-            position: sticky; right: 14px; bottom: 14px;
+            position: fixed; right: 14px; bottom: 14px;
             width: 46px; height: 46px; border-radius: 999px;
             display:inline-flex; align-items:center; justify-content:center; gap:10px;
             background:
@@ -241,11 +241,11 @@ def show_help_widget(
 
           /* --- GLASS POPOVER (COMPACT) --- */
           .help-backdrop {{
-            position: sticky; inset: 0; background: rgba(2,6,23,.08);
+            position: fixed; inset: 0; background: rgba(2,6,23,.08);
             opacity:0; pointer-events:none; transition: opacity .15s ease;
           }}
           .help-card {{
-            position: sticky; right: 14px; bottom: 66px; width: min(92vw, 320px);
+            position: fixed; right: 14px; bottom: 66px; width: min(92vw, 320px);
             background: var(--help-glass);
             color: var(--help-ink);
             border-radius: 16px;
@@ -3650,6 +3650,7 @@ elif st.session_state.page == "clinicos":
                 st.success("Novo paciente cadastrado!")
 
     
+
 
 
 
