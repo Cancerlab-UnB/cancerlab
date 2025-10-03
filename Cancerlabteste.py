@@ -673,20 +673,40 @@ def render_navbar(active: str = "home", unbimg: str | None = None):
 
 def show_anniversary_cta(
     image_relpath: str = "static/anniversary13.jpg",
-    caption: str = "🎈 13 years of scientific innovation!",
+    caption: str = "🎈 13 anos de inovação científica",
 ):
     import base64, uuid, mimetypes
     from pathlib import Path
+    from urllib.parse import urlencode
     import streamlit as st
 
-    # === util: tenta usar cached_img_uri do seu projeto; senão, gera data URI local ===
+    # ---- ler params (suporta versões novas/antigas) ----
+    def _get_params():
+        try:  # >= 1.32
+            qp = st.query_params
+            # forçam str (se vier lista, pega o último)
+            out = {k: (qp.get(k, None) if not isinstance(qp.get(k, None), list) else qp.get(k)[-1]) for k in qp}
+        except Exception:  # legacy
+            qp = st.experimental_get_query_params()
+            out = {k: (qp[k][-1] if isinstance(qp[k], list) and qp[k] else qp[k]) for k in qp}
+        return {k: v for k, v in out.items() if v is not None}
+
+    params = _get_params()
+    if params.get("dismiss_anniv") == "1":
+        return  # não renderiza o popup se já foi fechado
+
+    # ---- gerar URL de fechar preservando parâmetros existentes ----
+    new_params = dict(params)
+    new_params["dismiss_anniv"] = "1"
+    close_url = "?" + urlencode(new_params, doseq=True)
+
+    # ---- util img -> data URI (reusa seu cached_img_uri se existir) ----
     def _img_uri(p: Path) -> str:
         try:
-            # se você já tem cached_img_uri no projeto
             return cached_img_uri(str(p))  # type: ignore[name-defined]
         except Exception:
             mime = mimetypes.guess_type(str(p))[0] or "image/jpeg"
-            b64 = base64.b64encode(p.read_bytes()).decode()
+            b64  = base64.b64encode(p.read_bytes()).decode()
             return f"data:{mime};base64,{b64}"
 
     p = Path(image_relpath)
@@ -705,7 +725,7 @@ def show_anniversary_cta(
     --anni-line: #e6eaf2;
   }}
 
-  /* ===== base ===== */
+  /* ===== Overlay fixo ===== */
   .{uid}-modal {{
     position: fixed; inset: 0; z-index: 4000;
     display: grid; place-items: center;
@@ -715,7 +735,8 @@ def show_anniversary_cta(
     background: rgba(2,6,23,.28);
     backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px);
   }}
-  /* ===== card ===== */
+
+  /* ===== Cartão ===== */
   .{uid}-card {{
     position: relative;
     width: min(92vw, 720px);
@@ -733,9 +754,10 @@ def show_anniversary_cta(
     position: absolute; right: 12px; top: 12px;
     width: 36px; height: 36px; border-radius: 999px;
     display: inline-flex; align-items:center; justify-content:center;
+    text-decoration: none;
     background: #fff; border: 1px solid var(--anni-line); cursor: pointer;
     box-shadow: 0 8px 16px rgba(2,6,23,.12);
-    font-weight: 900;
+    font-weight: 900; color: var(--anni-ink);
   }}
   .{uid}-head {{
     padding: 14px 18px 0 18px;
@@ -749,14 +771,8 @@ def show_anniversary_cta(
     border-radius:12px; border:1px solid var(--anni-line);
     box-shadow: 0 10px 24px rgba(2,6,23,.08);
   }}
-  /* ===== close via checkbox (default: aberto) ===== */
-  #{uid}-toggle {{ position: fixed; opacity:0; pointer-events:none; }}
-  /* quando DESmarcar (clicar no X), esconda tudo */
-  #{uid}-toggle:not(:checked) ~ .{uid}-modal {{ display: none; }}
-  /* ===== balloons ===== */
-  .{uid}-balloons {{
-    position:absolute; inset:0; overflow:hidden; pointer-events:none;
-  }}
+  /* ===== Balões ===== */
+  .{uid}-balloons {{ position:absolute; inset:0; overflow:hidden; pointer-events:none; }}
   .{uid}-balloon {{
     position:absolute; bottom:-20vh; width:36px; height:48px; border-radius:50% 50% 45% 55%;
     background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.8) 0 14%, transparent 15%),
@@ -775,14 +791,13 @@ def show_anniversary_cta(
     75% {{ transform: translateY(-60vh) translateX(-6px) rotate(-1deg); }}
     100%{{ transform: translateY(-85vh) translateX(0) rotate(0deg); }}
   }}
-  /* 6 balões com posições e delays diferentes */
   .{uid}-b1 {{ left:10%; animation-duration: 10s; animation-delay: -1s; }}
   .{uid}-b2 {{ left:25%; animation-duration: 9.5s; animation-delay: -3s; }}
   .{uid}-b3 {{ left:40%; animation-duration: 11s; animation-delay: -2s; }}
   .{uid}-b4 {{ left:60%; animation-duration: 10.5s; animation-delay: -4s; }}
   .{uid}-b5 {{ left:75%; animation-duration: 9s; animation-delay: -1.5s; }}
   .{uid}-b6 {{ left:88%; animation-duration: 12s; animation-delay: -3.5s; }}
-  /* ===== fireworks ===== */
+  /* ===== Fogos ===== */
   .{uid}-fireworks {{ position:absolute; inset:0; pointer-events:none; }}
   .{uid}-fw {{
     position:absolute; width:2px; height:2px; left:50%; top:50%;
@@ -810,21 +825,19 @@ def show_anniversary_cta(
     50%  {{ opacity: .9; }}
     100% {{ opacity: 0; transform: translate(-50%, -50%) scale(0.1); }}
   }}
-  /* posiciona cada explosão em cantos diferentes */
   .{uid}-fw.pos1 {{ left: 18%; top: 24%; }}
   .{uid}-fw.pos2 {{ left: 82%; top: 22%; }}
   .{uid}-fw.pos3 {{ left: 50%; top: 10%; }}
-  /* responsivo: reduz margem interna em telas pequenas */
+
   @media (max-width: 540px) {{
     .{uid}-head {{ padding-top: 12px; }}
     .{uid}-body {{ padding: 10px 12px 14px 12px; }}
   }}
 </style>
-<!-- toggle invisível: marcado por padrão => popup visível ao carregar -->
-<input id="{uid}-toggle" type="checkbox" checked />
 <div class="{uid}-modal" role="dialog" aria-modal="true" aria-label="Pop-up de Aniversário">
-  <div class="{uid}-backdrop"></div>
-  <!-- camadas de efeitos -->
+  <!-- backdrop clicável: fecha via URL -->
+  <a class="{uid}-backdrop" href="{close_url}" aria-hidden="true"></a>
+  <!-- camadas decorativas -->
   <div class="{uid}-balloons">
     <div class="{uid}-balloon {uid}-b1"></div>
     <div class="{uid}-balloon {uid}-b2"></div>
@@ -840,7 +853,7 @@ def show_anniversary_cta(
   </div>
   <!-- cartão -->
   <div class="{uid}-card">
-    <label for="{uid}-toggle" class="{uid}-close" title="Fechar">✕</label>
+    <a href="{close_url}" class="{uid}-close" title="Fechar">✕</a>
     <div class="{uid}-head">{caption}</div>
     <div class="{uid}-body">
       <img class="{uid}-img" src="{data}" alt="Aniversário CancerLab" loading="eager" decoding="async" />
@@ -850,6 +863,7 @@ def show_anniversary_cta(
         """,
         unsafe_allow_html=True,
     )
+
 
 
 
@@ -3767,6 +3781,7 @@ elif st.session_state.page == "clinicos":
                 st.success("Novo paciente cadastrado!")
 
     
+
 
 
 
