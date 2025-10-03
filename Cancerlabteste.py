@@ -671,7 +671,7 @@ def render_navbar(active: str = "home", unbimg: str | None = None):
 
 
 
-def show_anniversary_popup_fixed(
+def show_anniversary_cta(
     image_relpath: str = "static/anniversary13.jpg",
     caption: str = "🎈 13 years of scientific innovation!",
 ):
@@ -3767,6 +3767,7 @@ elif st.session_state.page == "clinicos":
                 st.success("Novo paciente cadastrado!")
 
     
+
 
 
 
