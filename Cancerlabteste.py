@@ -673,7 +673,7 @@ def render_navbar(active: str = "home", unbimg: str | None = None):
 
 def show_anniversary_cta(
     image_relpath: str = "static/anniversary13.jpg",
-    caption: str = "🎈 13 anos de inovação científica",
+    caption: str = "🎈 13 years of scientific innovation!",
 ):
     import base64, uuid, mimetypes
     from pathlib import Path
@@ -3781,6 +3781,7 @@ elif st.session_state.page == "clinicos":
                 st.success("Novo paciente cadastrado!")
 
     
+
 
 
 
