@@ -1888,7 +1888,13 @@ def page_equipment():
     st.markdown("".join(cards), unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
-
+    show_help_widget(
+    name="Victor Fleck",
+    email="Victor.fleck906438@gmail.com",
+    role="Undergraduate Pharmacy Student • Web Developer :) ",
+    phone="+55 61 991281207",
+    label="Problems with the website?"
+    )
 
 def page_people():
 
@@ -2481,7 +2487,13 @@ def page_partners():
 
     st.markdown('</div>', unsafe_allow_html=True)
 
-
+    show_help_widget(
+    name="Victor Fleck",
+    email="Victor.fleck906438@gmail.com",
+    role="Undergraduate Pharmacy Student • Web Developer :) ",
+    phone="+55 61 991281207",
+    label="Problems with the website?"
+    )
 def page_positions():
 
     # ---------- helpers ----------
@@ -2735,7 +2747,13 @@ def page_positions():
     )
 
     st.markdown("</div>", unsafe_allow_html=True)
-
+    show_help_widget(
+    name="Victor Fleck",
+    email="Victor.fleck906438@gmail.com",
+    role="Undergraduate Pharmacy Student • Web Developer :) ",
+    phone="+55 61 991281207",
+    label="Problems with the website?"
+    )
 
 
 def go_login():
@@ -3769,6 +3787,7 @@ elif st.session_state.page == "clinicos":
                 st.success("Novo paciente cadastrado!")
 
     
+
 
 
 
