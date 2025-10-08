@@ -2361,7 +2361,7 @@ def page_people():
          {"name": "Victor Henrique Fragoso de Mendonça Santiago Paula", "lattes": "http://lattes.cnpq.br/7903416721142160", "year": "", "activity": "PIBIC"},
          {"name": "Julia Silva Valerio Diniz", "lattes": "http://lattes.cnpq.br/8609581256832375", "year": "", "activity": "PIBIC"},
          {"name": "Anne Caroline Duarte Moreira", "lattes": "http://buscatextual.cnpq.br/buscatextual/visualizacv.jsp?id=K4465126E4", "year": "", "activity": "PIBIC"},
-         {"name": "Mariana Carneiro da Cunha", "lattes": "", "year": "", "activity": "PIBIC"},
+         {"name": "Mariana Carneiro da Cunha", "lattes": "http://lattes.cnpq.br/6954304874399333", "year": "", "activity": "PIBIC"},
          {"name": "Luís Augusto Muniz Telles", "lattes": "http://lattes.cnpq.br/1987858702905034", "year": "", "activity": "PIBIC"},
          {"name": "Brenno Vinícius Martins Henrique", "lattes": "http://buscatextual.cnpq.br/buscatextual/visualizacv.jsp?id=K4465807Y2", "year": "", "activity": "PIBIC"},
          {"name": "Isabel Santos Cardoso", "lattes": "http://lattes.cnpq.br/2615729486438083", "year": "", "activity": "PIBIC"},
@@ -3986,6 +3986,7 @@ elif st.session_state.page == "clinicos":
                 st.success("Novo paciente cadastrado!")
 
     
+
 
 
 
