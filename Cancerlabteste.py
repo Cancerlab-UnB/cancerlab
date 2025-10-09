@@ -1170,8 +1170,6 @@ def page_research():
     st.markdown(
         f"""
         <style>
-        /* ===== Base / previsibilidade ===== */
-        .wrap, .wrap * {{ box-sizing: border-box; }}
         /* container */
         .wrap {{ max-width:1180px; margin:32px auto; padding:0 16px; }}
         /* ======= HERO (intro band) ======= */
@@ -1196,11 +1194,6 @@ def page_research():
           margin: 8px auto 18px;
           max-width: 80ch;
         }}
-        /* Prevenir overflow lateral */
-        .wrap p, .wrap h1, .wrap h2, .wrap h3, .wrap h4, .wrap h5, .wrap a, .chip, .r-sub {{
-          overflow-wrap: anywhere; word-break: break-word;
-        }}
-        .wrap {{ overflow-x: hidden; }}
         .topic-pills {{
           display:grid;
           grid-template-columns: 1fr;
@@ -1221,7 +1214,6 @@ def page_research():
           border:1px solid #e7e7ef;
           box-shadow: 0 8px 22px rgba(2,6,23,.06);
           transition: transform .2s ease, box-shadow .2s ease;
-          will-change: transform;
         }}
         .pill:hover{{ transform: translateY(-2px); box-shadow: 0 14px 30px rgba(2,6,23,.10); }}
         .pill-icon{{
@@ -1232,7 +1224,6 @@ def page_research():
         }}
         .pill h4{{ margin:0 0 4px; font-size:16px; color: var(--TEXT_DARK, #0f172a); }}
         .pill p{{ margin:0; font-size:14.5px; line-height:1.55; color:#1f2937; }}
-
         /* ======= MAIN LAYOUT: sticky side + content ======= */
         .r-body{{
           display:grid; gap:24px; align-items:start;
@@ -1257,14 +1248,11 @@ def page_research():
         }}
         .toc li a:hover{{ background:rgba(19,81,216,.06); }}
         /* content cards */
-        :root {{ --top-offset: 96px; }}              /* offset padrão de âncora */
-        @media (max-width: 480px){{ :root {{ --top-offset: 128px; }} }} /* mais folga no mobile */
         .r-content{{ display:grid; gap:18px; }}
         .section{{
           background:#fff; border:1px solid #e7e7ef; border-radius:16px;
           padding:18px 20px; box-shadow:0 12px 28px rgba(2,6,23,.08);
-          scroll-margin-top: var(--top-offset);
-          will-change: transform;
+          scroll-margin-top: 96px; /* ensure anchors show below sticky topbar */
         }}
         .section h2{{
           margin:0 0 8px; font-size: clamp(18px, 2.6vw, 24px); line-height:1.25;
@@ -1277,40 +1265,29 @@ def page_research():
           font-size:12.5px; padding:4px 10px; border-radius:999px;
           border:1px solid #cfd6f3; background:#f7f9ff; color:#0f172a; font-weight:700;
         }}
-
-        /* links mantém sublinhado tracejado do site */
+        /* links keep dashed underline style from site */
         .wrap a{{ color: var(--primary, #1351d8); text-decoration:none; border-bottom:1px dashed rgba(19,81,216,.35); }}
         .wrap a:hover{{ text-decoration:underline; }}
-        /* ======= MOBILE / TOUCH FIXES ======= */
-        /* Desativar sticky em dispositivos touch (mesmo se largura >=980) */
-        @media (hover: none), (pointer: coarse) {{
+        /* ======= MOBILE FIXES =======
+           1) Disable sticky on small screens
+           2) Turn TOC into a horizontal, scrollable chip bar
+           3) Lighter shadows for smoother scrolling
+        */
+        @media (max-width: 979px){{
           .r-side{{
             position: static; top:auto;
             box-shadow:none; border:1px dashed rgba(19,81,216,.25); background:#f8fafc;
           }}
-          .pill {{ box-shadow: 0 4px 12px rgba(2,6,23,.06); }}
-          .pill:hover {{ transform:none; box-shadow: 0 4px 12px rgba(2,6,23,.06); }}
-          .section {{ box-shadow: 0 6px 16px rgba(2,6,23,.06); }}
-        }}
-
-        /* TOC horizontal com rolagem “touch-friendly” */
-        @media (max-width: 979px){{
-          .toc{{
-            display:flex; gap:8px; overflow-x:auto; padding:8px 2px 12px;
-            -webkit-overflow-scrolling: touch; scrollbar-width: none;
+          .r-side h5{{ display:none; }}
+          .toc{{ 
+            display:flex; gap:8px; overflow-x:auto; padding:8px 2px 10px;
+            -webkit-overflow-scrolling: touch;
           }}
-          .toc::-webkit-scrollbar{{ display:none; }}
           .toc li{{ flex:0 0 auto; }}
           .toc li a{{
-            padding:10px 12px; border-radius:999px;
             margin:0; border-style: solid; background:#fff; white-space:nowrap;
           }}
-        }}
-
-        /* Títulos um pouco mais adaptáveis em telas muito pequenas */
-        @media (max-width: 380px){{
-          .r-title{{ font-size: clamp(26px, 6vw, 40px); }}
-          .r-sub  {{ font-size: clamp(16px, 4.4vw, 18px); }}
+          .section{{ box-shadow:0 6px 16px rgba(2,6,23,.06); }}
         }}
         </style>
         <div class="wrap">
@@ -1374,6 +1351,8 @@ def page_research():
                 <p>We investigate circulating tumor DNA (ctDNA) in blood samples, aiming to identify and quantify genetic alterations associated with oncogenesis and tumor progression. This includes the detection of frequent mutations, gene amplifications, and absolute copy numbers of carcinogenic nucleic acid fragments. Using advanced technologies such as next-generation sequencing (NGS) and digital PCR, we design mutation panels tailored to cancer-specific profiles.
                 A key aspect of this work is the evaluation of ctDNA as a diagnostic screening method for early cancer detection, as well as a dynamic biomarker to monitor tumor burden in patients undergoing targeted therapies. This approach enables the real-time assessment of treatment effectiveness and supports more personalized therapeutic decisions.
                 We are also applying these strategies to colorectal cancer (CRC), the second most common and third deadliest cancer in Brazil. By assessing the prognostic value of ctDNA in CRC patients, we aim to improve recurrence monitoring and clinical management after surgical resection—the current curative standard of care. This project is supported by CNPq/MS and FAPDF, reinforcing our commitment to translating liquid biopsy into practice for better cancer outcomes.</p>
+                <p></p>
+                <p></p>
                 <div class="chips" aria-label="Funding and focus tags">
                   <span class="chip">NGS</span><span class="chip">digital PCR</span><span class="chip">ctDNA</span>
                   <span class="chip">CRC</span><span class="chip">Screening</span><span class="chip">Therapy monitoring</span>
@@ -1381,46 +1360,26 @@ def page_research():
               </section>
               <section id="epigenetics" class="section" aria-labelledby="epigenetics-h">
                 <h2 id="epigenetics-h">Cancer Epigenetics</h2>
-                <p>Our laboratory investigates how epigenetic regulators, including protein methyltransferases and demethylases, influence the development and progression of solid tumors and leukemias. By studying their roles in gene regulation, chromatin organization, and genomic stability, we aim to uncover how their dysregulation drives cancer. We also seek to identify novel biomarkers and therapeutic targets, translating our findings into more precise and effective cancer treatments. We use a variety of approaches to investigate their association with carcinogenesis and to identify new prognostic markers and therapeutic targets. Our work highlights how the dysregulation of these enzymes are not just passive modifiers of the genome but active drivers of cancer biology, opening opportunities for more precise and effective treatments.</p>
+                <p>Our laboratory investigates how epigenetic regulators, including protein methyltransferases and demethylases, influence the development and progression of solid tumors and leukemias. By studying their roles in gene regulation, chromatin organization, and genomic stability, we aim to uncover how their dysregulation drives cancer. We also seek to identify novel biomarkers and therapeutic targets, translating our findings into more precise and effective cancer treatments. We use a variety of approaches to investigate their association with carcinogenesis and to identify new prognostic markers and therapeutic targets. Our work highlights how the dysregulation of these enzymes are not just passive modifiers of the genome but active drivers of cancer biology, opening opportunities for more precise and effective treatments.</p>
                 <div class="chips" aria-label="Funding and focus tags">
                   <span class="chip">Leukemias</span><span class="chip">Chromatin organization</span><span class="chip">Methyltransferases</span>
                 </div>
               </section>
               <section id="gene-editing" class="section" aria-labelledby="gene-editing-h">
                 <h2 id="gene-editing-h">CRISPR/Cas9 Gene Editing</h2>
-                <p>CRISPR-Cas9 is a powerful technology that allows scientists to precisely modify DNA within living cells. It uses a guide RNA to locate a specific DNA sequence and the Cas9 enzyme to make a targeted cut at that location. This cut can then be repaired by the cell, allowing us to disable, modify, or insert genes. In this context, our group is actively to development CRISPR/Cas9-based Gene editing tools for selective knockout (KO) of cancer-related targets, with a primary focus on epigenetic modifiers. Although CRISPR is a relatively recent innovation in biotechnology, it has rapidly become an essential research tool. Nevertheless, optimizing and implementing this technology still requires significant effort, which can exceed the capacity of many research laboratories. Our laboratory aims to serve as a facilitator, making CRISPR accessible to other research groups through collaborative efforts or service provision. By bypassing the resource-intensive process of optimization, we provide practical, ready-to-use solutions for immediate applications, thereby contributing to the advancement of regional and national scientific research.</p>
+                <p>CRISPR-Cas9 is a powerful technology that allows scientists to precisely modify DNA within living cells. It uses a guide RNA to locate a specific DNA sequence and the Cas9 enzyme to make a targeted cut at that location. This cut can then be repaired by the cell, allowing us to disable, modify, or insert genes. In this context, our group is actively to development CRISPR/Cas9-based Gene editing tools for selective knockout (KO) of cancer-related targets, with a primary focus on epigenetic modifiers. Although CRISPR is a relatively recent innovation in biotechnology, it has rapidly become an essential research tool. Nevertheless, optimizing and implementing this technology still requires significant effort, which can exceed the capacity of many research laboratories. Our laboratory aims to serve as a facilitator, making CRISPR accessible to other research groups through collaborative efforts or service provision. By bypassing the resource-intensive process of optimization, we provide practical, ready-to-use solutions for immediate applications, thereby contributing to the advancement of regional and national scientific research.</p>
                 <div class="chips" aria-label="Funding and focus tags">
                   <span class="chip">KO</span><span class="chip">Cas9 nuclease</span><span class="chip">CRISPR/Cas9</span>
                   <span class="chip">Clonal isolation</span><span class="chip">Off-target analysis</span>
                 </div>
-              </section>
+                </section>
             </main>
           </div>
         </div>
-        <!-- ===== Rolagem suave para âncoras da TOC ===== -->
-        <script>
-        (function() {{
-          try {{
-            var toc = document.querySelectorAll('.toc a');
-            toc.forEach(function(a){{
-              a.addEventListener('click', function(e){{
-                var href = a.getAttribute('href') || '';
-                if(href.startsWith('#')) {{
-                  e.preventDefault();
-                  var tgt = document.querySelector(href);
-                  if(tgt) {{
-                    tgt.scrollIntoView({{ behavior:'smooth', block:'start' }});
-                    history.replaceState(null, '', href);
-                  }}
-                }}
-              }});
-            }});
-          }} catch(err) {{}}
-        }})();
-        </script>
         """,
         unsafe_allow_html=True,
     )
+
 
 
 
@@ -3986,6 +3945,7 @@ elif st.session_state.page == "clinicos":
                 st.success("Novo paciente cadastrado!")
 
     
+
 
 
 
