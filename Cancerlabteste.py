@@ -3010,7 +3010,7 @@ def page_news():
             "url": "https://www.fap.df.gov.br/w/cancer-de-mama-pesquisa-da-unb-investiga-novos-caminhos-para-conter-a-metastase",
             "date_iso": "2025-10-02",
             # You asked to keep the caption as the URL:
-            "title": "https://www.fap.df.gov.br/w/cancer-de-mama-pesquisa-da-unb-investiga-novos-caminhos-para-conter-a-metastase",
+            "title": "Câncer de mama: pesquisa da UnB investiga novos caminhos para conter a metástase",
             "dek": "FAP-DF feature about CancerLab/UnB research on strategies to contain breast cancer metastasis.",
             "thumb": None,  # e.g. "static/news/fapdf_oct2025.jpg" to show an image
         },
@@ -4197,6 +4197,7 @@ elif st.session_state.page == "clinicos":
                 st.success("Novo paciente cadastrado!")
 
     
+
 
 
 
