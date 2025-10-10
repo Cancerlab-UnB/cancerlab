@@ -3049,7 +3049,7 @@ def page_news():
         - https://youtu.be/ID
         - https://www.youtube.com/embed/ID
         """
-        m = re.search(r"(?:youtube\.com/(?:watch\\?v=|embed/)|youtu\.be/)([A-Za-z0-9_-]{11})", u)
+        m = re.search(r"(?:youtube\.com/(?:watch\?v=|embed/)|youtu\.be/)([A-Za-z0-9_-]{11})", u)
         if m:
             return m.group(1)
         # fallback: explicit v= param
@@ -4211,6 +4211,7 @@ elif st.session_state.page == "clinicos":
                 st.success("Novo paciente cadastrado!")
 
     
+
 
 
 
