@@ -3010,10 +3010,9 @@ def page_news():
             "kind": "press",
             "url": "https://www.fap.df.gov.br/w/cancer-de-mama-pesquisa-da-unb-investiga-novos-caminhos-para-conter-a-metastase",
             "date_iso": "2025-10-02",
-            # You asked to keep the caption as the URL:
             "title": "Câncer de mama: pesquisa da UnB investiga novos caminhos para conter a metástase",
             "dek": "FAP-DF feature about CancerLab/UnB research on strategies to contain breast cancer metastasis.",
-            "thumb": None,  # e.g. "static/news/fapdf_oct2025.jpg" to show an image
+            "thumb": None,  # e.g. "static/news/fapdf_oct2025.jpg"
         },
         {
             "kind": "video",
@@ -3052,25 +3051,34 @@ def page_news():
         m = re.search(r"(?:youtube\.com/(?:watch\?v=|embed/)|youtu\.be/)([A-Za-z0-9_-]{11})", u)
         if m:
             return m.group(1)
-        # fallback: explicit v= param
         m = re.search(r"[?&]v=([A-Za-z0-9_-]{11})", u)
         return m.group(1) if m else None
 
-    # ------------------ Styles ------------------
+    # ------------------ Styles (texto padrão, botão ciano/branco) ------------------
     st.markdown(
         """
         <style>
+          :root{
+            --text:#0f172a;      /* cor padrão do site para textos/títulos */
+            --text-sub:#0f172a;  /* subtítulo também escuro */
+            --muted:#475569;     /* detalhes/links finos */
+            --chip-bg:#f3f4f6;   /* chip neutro */
+            --chip-bd:#e5e7eb;
+            --cyan:#06b6d4;      /* apenas para o botão */
+            --cyan-soft: rgba(6,182,212,.08);
+          }
+
           .wrap{max-width:1180px;margin:26px auto;padding:0 16px}
           .hero{text-align:center;padding:10px 0 6px;background:
-            radial-gradient(1200px 260px at 50% -60px, rgba(19,81,216,.08), transparent 60%)}
+            radial-gradient(1200px 260px at 50% -60px, rgba(19,81,216,.10), transparent 60%)}
           .title{font-weight:900;letter-spacing:-.01em;font-size:clamp(28px,4.4vw,46px);
-            color:var(--TEXT_DARK,#0f172a)}
-          .sub{color:var(--primary,#1351d8);font-weight:750;font-size:clamp(16px,2.1vw,18px)}
+            color:var(--text)}
+          .sub{color:var(--text-sub);font-weight:750;font-size:clamp(16px,2.1vw,18px)}
 
           .grid{display:grid;gap:16px;margin-top:14px;grid-template-columns:1fr}
           @media (min-width:980px){.grid{grid-template-columns:1.15fr .85fr}}
 
-          .card{background:#fff;border:1px solid #e8edf6;border-radius:16px;
+          .card{background:#fff;border:1px solid #f0f2f8;border-radius:16px;
             box-shadow:0 10px 22px rgba(2,6,23,.06);overflow:hidden}
           .card--calm{box-shadow:0 6px 16px rgba(2,6,23,.05)}
 
@@ -3078,28 +3086,35 @@ def page_news():
           .media img,.media iframe{position:absolute;inset:0;width:100%;height:100%;border:0;object-fit:cover}
 
           .body{padding:14px 16px 16px}
-          .h3{margin:6px 0 6px;font-weight:900;color:var(--TEXT_DARK,#0f172a);
+          .h3{margin:6px 0 6px;font-weight:900;color:var(--text);
             font-size:clamp(18px,2.2vw,22px)}
           .dek{color:#1f2937;line-height:1.6}
           .meta{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
-          .chip{display:inline-flex;align-items:center;gap:8px;background:rgba(19,81,216,.06);
-            border:1px solid #dbe2f1;color:#0f172a;border-radius:999px;padding:6px 10px;font-weight:800;font-size:.85rem}
-          .fine{color:#475569;font-size:.9rem;margin-top:6px;word-break:break-word}
-          .btn{display:inline-flex;align-items:center;gap:8px;padding:9px 12px;border-radius:12px;
-            font-weight:800;border:1px solid #cfd8ee;text-decoration:none;color:var(--TEXT_DARK,#0f172a)}
-          .btn:hover{background:rgba(19,81,216,.06)}
+          .chip{display:inline-flex;align-items:center;gap:8px;background:var(--chip-bg);
+            border:1px solid var(--chip-bd);color:var(--text);border-radius:999px;
+            padding:6px 10px;font-weight:800;font-size:.85rem}
+          .fine{color:var(--muted);font-size:.9rem;margin-top:6px;word-break:break-word}
 
-          /* Smaller, side-by-side video card */
+          /* Botão: fundo branco + texto ciano (único com ciano) */
+          .btn{
+            display:inline-flex;align-items:center;gap:8px;padding:9px 12px;border-radius:12px;
+            font-weight:800;border:1.5px solid var(--cyan);text-decoration:none;
+            color:var(--cyan); background:#ffffff;
+            box-shadow:0 6px 18px rgba(6,182,212,.12);
+          }
+          .btn:hover{ background:var(--cyan-soft); }
+
+          /* Vídeo menor, lado a lado */
           .video-card{
             display:grid;
-            grid-template-columns:minmax(240px,42%) 1fr; /* video | text */
+            grid-template-columns:minmax(240px,42%) 1fr; /* video | texto */
             gap:14px; align-items:start;
           }
           @media (max-width:880px){ .video-card{ grid-template-columns:1fr; } }
           .media--sm{ aspect-ratio:16/9; }
           .body--compact{ padding:12px 12px 14px; }
           .h4{ margin:4px 0 6px; font-weight:800;
-               font-size:clamp(15px,1.8vw,18px); color:var(--TEXT_DARK,#0f172a); }
+               font-size:clamp(15px,1.8vw,18px); color:var(--text); }
           .dek--muted{ color:#334155; font-size:.95rem; line-height:1.5; }
           .meta .chip{ font-size:.8rem; padding:5px 9px; }
         </style>
@@ -3142,7 +3157,7 @@ def page_news():
             unsafe_allow_html=True
         )
     st.markdown('</div>', unsafe_allow_html=True)
-    # --------- RIGHT: Video (YouTube, smaller + text beside) ----------
+    # --------- RIGHT: Video (YouTube, menor + texto ao lado) ----------
     video = next((i for i in NEWS_ITEMS if i["kind"] == "video"), None)
     st.markdown('<div>', unsafe_allow_html=True)
     if video:
@@ -3167,6 +3182,7 @@ def page_news():
     st.markdown('</div>', unsafe_allow_html=True)
     # --------- Close ----------
     st.markdown("</div></div>", unsafe_allow_html=True)
+
 
 show_help_widget(
     name="Victor Fleck",
@@ -4211,6 +4227,7 @@ elif st.session_state.page == "clinicos":
                 st.success("Novo paciente cadastrado!")
 
     
+
 
 
 
