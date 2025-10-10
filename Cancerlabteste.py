@@ -349,7 +349,7 @@ def show_lab_header(
         "University of Brasília",
         "Brasília – DF – Brazil",
     ),
-    logo_height_px: int = 180,   # maior por padrão
+    logo_height_px: int = 180,
 ):
     from pathlib import Path
     p = Path(image_relpath)
@@ -375,11 +375,9 @@ def show_lab_header(
     st.markdown(
         f"""
         <style>
-          /* ===== Header card modernizado ===== */
+          /* ===== Header card com fundo branco ===== */
           .brand-header {{
-            background:
-              radial-gradient(1200px 340px at 18% -140px, rgba(19,81,216,.14), transparent 65%),
-              linear-gradient(180deg, rgba(19,81,216,.06), rgba(19,81,216,0));
+            background: #ffffff;                      /* <- branco puro */
             border: 1px solid rgba(2,6,23,.06);
             border-radius: 16px;
             box-shadow: 0 10px 26px rgba(2,6,23,.06);
@@ -388,22 +386,16 @@ def show_lab_header(
           .brand-wrap {{
             max-width:1180px;
             margin:0 auto;
-            padding: 24px 22px;                     /* mais alto e arejado */
+            padding: 24px 22px;
             display:grid;
             grid-template-columns:auto 1fr;          /* logo | texto */
             align-items:center;
             gap:34px;
           }}
 
-          /* “Spotlight” atrás do logo */
+          /* remove qualquer brilho atrás do logo */
           .brand-left {{ position:relative; }}
-          .brand-left::before {{
-            content:""; position:absolute; inset:auto; left:-10px; top:-8px;
-            width:120px; height:120px; border-radius:50%;
-            background: radial-gradient(circle at 50% 50%, rgba(19,81,216,.22), transparent 70%);
-            filter: blur(16px);
-            pointer-events:none;
-          }}
+          .brand-left::before {{ display:none; }}
 
           /* Logo grande com escala responsiva */
           .brand-header .logo {{
@@ -414,7 +406,7 @@ def show_lab_header(
           }}
           .brand-header .logo-link {{ text-decoration:none; line-height:0; }}
 
-          /* Bloco do endereço: tipografia maior e clean */
+          /* Tipografia do endereço */
           .brand-header .addr {{
             text-align:right;
             color: var(--TEXT_DARK, #0f172a);
@@ -423,7 +415,7 @@ def show_lab_header(
           .brand-header .addr .lab {{
             display:block;
             font-weight:800;
-            font-size:clamp(24px, 3.0vw, 34px);     /* maior */
+            font-size:clamp(24px, 3.0vw, 34px);
             line-height:1.12;
           }}
           .brand-header .addr .lab::after {{
@@ -446,7 +438,6 @@ def show_lab_header(
             .brand-header .addr {{ text-align:center; }}
             .brand-header .logo {{ margin:0 auto; }}
             .brand-header .addr .lab::after {{ margin-left:auto; margin-right:auto; }}
-            .brand-left::before {{ left:50%; transform:translateX(-50%); }}
           }}
         </style>
         <div class="brand-header" role="banner" aria-label="Laboratory heading">
@@ -4214,6 +4205,7 @@ elif st.session_state.page == "clinicos":
                 st.success("Novo paciente cadastrado!")
 
     
+
 
 
 
