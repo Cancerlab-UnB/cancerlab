@@ -3016,7 +3016,7 @@ def page_news():
         },
         {
             "kind": "video",
-            "url": "https://vimeo.com/1126019792?share=copy",
+            "url": "https://www.youtube.com/watch?v=xiiLgiTCiZM",
             "date_iso": "2025-10-09",
             "title": "Pink October | Globo TV Interview",
             "dek": "Our team discusses ongoing breast cancer research in a special Globo TV interview.",
@@ -3041,8 +3041,18 @@ def page_news():
         u = u.replace("https://", "").replace("http://", "")
         return u if len(u) <= 96 else (u[:93] + "…")
 
-    def _vimeo_id(u: str):
-        m = re.search(r"vimeo\.com/(?:video/)?(\d+)", u)
+    def _youtube_id(u: str):
+        """
+        Extract a 11-char YouTube ID from common URL formats:
+        - https://www.youtube.com/watch?v=ID
+        - https://youtu.be/ID
+        - https://www.youtube.com/embed/ID
+        """
+        m = re.search(r"(?:youtube\.com/(?:watch\\?v=|embed/)|youtu\.be/)([A-Za-z0-9_-]{11})", u)
+        if m:
+            return m.group(1)
+        # fallback: explicit v= param
+        m = re.search(r"[?&]v=([A-Za-z0-9_-]{11})", u)
         return m.group(1) if m else None
 
     # ------------------ Styles ------------------
@@ -3111,7 +3121,6 @@ def page_news():
         title = press["title"] or _trim_url(press["url"])
         dek = press.get("dek") or ""
 
-        # Only render media if a thumbnail exists
         media_html = f'<div class="media"><img src="{_e(thumb)}" alt="Press image"></div>' if thumb else ""
 
         st.markdown(
@@ -3132,19 +3141,18 @@ def page_news():
             unsafe_allow_html=True
         )
     st.markdown('</div>', unsafe_allow_html=True)
-    # --------- RIGHT: Video (smaller + text beside) ----------
+    # --------- RIGHT: Video (YouTube, smaller + text beside) ----------
     video = next((i for i in NEWS_ITEMS if i["kind"] == "video"), None)
     st.markdown('<div>', unsafe_allow_html=True)
     if video:
-        v_id = _vimeo_id(video["url"])
+        yt_id = _youtube_id(video["url"])
         date_str = _fmt_date(video["date_iso"])
-        embed = f"https://player.vimeo.com/video/{v_id}?title=0&byline=0&portrait=0&dnt=1" if v_id else None
-
+        embed = f"https://www.youtube-nocookie.com/embed/{yt_id}?rel=0&modestbranding=1&playsinline=1" if yt_id else None
         st.markdown(
             f"""
             <article class="card card--calm video-card" role="article" aria-label="{_e(video['title'])}">
               <div class="media media--sm">
-                {f'<iframe src="{_e(embed)}" loading="lazy" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen title="Vimeo video"></iframe>' if embed else ''}
+                {f'<iframe src="{_e(embed)}" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen title="YouTube video"></iframe>' if embed else ''}
               </div>
               <div class="body body--compact">
                 <div class="meta"><span class="chip">{_e(date_str)}</span></div>
@@ -3156,7 +3164,6 @@ def page_news():
             unsafe_allow_html=True
         )
     st.markdown('</div>', unsafe_allow_html=True)
-
     # --------- Close ----------
     st.markdown("</div></div>", unsafe_allow_html=True)
 
@@ -4197,6 +4204,7 @@ elif st.session_state.page == "clinicos":
                 st.success("Novo paciente cadastrado!")
 
     
+
 
 
 
