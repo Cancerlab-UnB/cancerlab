@@ -341,7 +341,7 @@ def show_help_widget(
 
 
 
-def show_lab_header(
+def show_lab_header( 
     image_relpath: str = "static/imgfront",
     address_lines: tuple[str, ...] = (
         "Laboratory of Molecular Pathology of Cancer",
@@ -349,9 +349,9 @@ def show_lab_header(
         "University of Brasília",
         "Brasília – DF – Brazil",
     ),
-    logo_height_px: int = 110,   # tweak to taste
+    logo_height_px: int = 180,   # maior por padrão
 ):
-    # resolve image path even if extension not provided
+    from pathlib import Path
     p = Path(image_relpath)
     if not p.suffix:
         for ext in (".svg", ".png", ".jpg", ".jpeg", ".webp", ".gif"):
@@ -362,7 +362,6 @@ def show_lab_header(
 
     img_tag = ""
     if p.exists():
-        # usar o cache em vez de re-ler e re-encodar a cada rerun
         img_uri = data_uri_cached(str(p))
         img_tag = (
             f'<a href="?page=home" class="logo-link" aria-label="Home">'
@@ -370,40 +369,52 @@ def show_lab_header(
             f'</a>'
         )
 
+    mobile_logo_h = max(72, logo_height_px - 48)
 
-    mobile_logo_h = max(60, logo_height_px - 32)
-
+    import streamlit as st
     st.markdown(
         f"""
         <style>
-          /* Card-like header to match the site vibe */
+          /* ===== Header card modernizado ===== */
           .brand-header {{
             background:
-              linear-gradient(180deg, rgba(63,94,181,.06), rgba(63,94,181,0)),
-              #fff;
+              radial-gradient(1200px 340px at 18% -140px, rgba(19,81,216,.14), transparent 65%),
+              linear-gradient(180deg, rgba(19,81,216,.06), rgba(19,81,216,0));
             border: 1px solid rgba(2,6,23,.06);
-            border-radius: 14px;
-            box-shadow: 0 10px 24px rgba(2,6,23,.06);
-            margin: 0 auto 10px;
+            border-radius: 16px;
+            box-shadow: 0 10px 26px rgba(2,6,23,.06);
+            margin: 0 auto 12px;
           }}
           .brand-wrap {{
             max-width:1180px;
             margin:0 auto;
-            padding: 18px 18px;
+            padding: 24px 22px;                     /* mais alto e arejado */
             display:grid;
-            grid-template-columns:auto 1fr; /* logo | address */
+            grid-template-columns:auto 1fr;          /* logo | texto */
             align-items:center;
-            gap:28px;
+            gap:34px;
           }}
-          /* Bigger, crisp logo */
+
+          /* “Spotlight” atrás do logo */
+          .brand-left {{ position:relative; }}
+          .brand-left::before {{
+            content:""; position:absolute; inset:auto; left:-10px; top:-8px;
+            width:120px; height:120px; border-radius:50%;
+            background: radial-gradient(circle at 50% 50%, rgba(19,81,216,.22), transparent 70%);
+            filter: blur(16px);
+            pointer-events:none;
+          }}
+
+          /* Logo grande com escala responsiva */
           .brand-header .logo {{
-            height:{logo_height_px}px;
-            max-height:26vh;
+            height: clamp({mobile_logo_h}px, 18vw, {logo_height_px}px);
+            max-height: min(32vh, {logo_height_px}px);
             width:auto; display:block;
             filter: drop-shadow(0 1px 0 rgba(0,0,0,.04));
           }}
           .brand-header .logo-link {{ text-decoration:none; line-height:0; }}
-          /* Modern address block */
+
+          /* Bloco do endereço: tipografia maior e clean */
           .brand-header .addr {{
             text-align:right;
             color: var(--TEXT_DARK, #0f172a);
@@ -412,29 +423,30 @@ def show_lab_header(
           .brand-header .addr .lab {{
             display:block;
             font-weight:800;
-            font-size:clamp(20px, 2.0vw, 24px);
+            font-size:clamp(24px, 3.0vw, 34px);     /* maior */
             line-height:1.12;
           }}
-          /* subtle accent underline */
           .brand-header .addr .lab::after {{
             content:"";
             display:block;
-            width:64px; height:3px; border-radius:2px;
-            background: rgba(63,94,181,.45);  /* soft blue accent */
-            margin:10px 0 8px auto;           /* right aligned */
+            width:72px; height:3px; border-radius:2px;
+            background: rgba(19,81,216,.45);
+            margin:12px 0 10px auto;
           }}
           .brand-header .addr .muted {{
             opacity:.9;
             font-weight:700;
-            font-size:clamp(13.5px, 1.05vw, 15.5px);
+            font-size:clamp(14px, 1.15vw, 17px);
             line-height:1.28;
           }}
-          /* Mobile: stack nicely */
+
+          /* ===== Mobile ===== */
           @media (max-width:900px){{
-            .brand-wrap {{ grid-template-columns:1fr; gap:12px; padding:16px 14px; }}
+            .brand-wrap {{ grid-template-columns:1fr; gap:14px; padding:18px 14px; }}
             .brand-header .addr {{ text-align:center; }}
-            .brand-header .logo {{ height:{mobile_logo_h}px; margin:0 auto; }}
+            .brand-header .logo {{ margin:0 auto; }}
             .brand-header .addr .lab::after {{ margin-left:auto; margin-right:auto; }}
+            .brand-left::before {{ left:50%; transform:translateX(-50%); }}
           }}
         </style>
         <div class="brand-header" role="banner" aria-label="Laboratory heading">
@@ -449,8 +461,6 @@ def show_lab_header(
         """,
         unsafe_allow_html=True
     )
-
-
 
 
 def _get_param(key: str, default=None):
@@ -4204,6 +4214,7 @@ elif st.session_state.page == "clinicos":
                 st.success("Novo paciente cadastrado!")
 
     
+
 
 
 
