@@ -3168,7 +3168,13 @@ def page_news():
     # --------- Close ----------
     st.markdown("</div></div>", unsafe_allow_html=True)
 
-
+show_help_widget(
+    name="Victor Fleck",
+    email="Victor.fleck906438@gmail.com",
+    role="Undergraduate Pharmacy Student • Web Developer :) ",
+    phone="+55 61 991281207",
+    label="Problems with the website?"
+    )
 
 
 
@@ -4205,6 +4211,7 @@ elif st.session_state.page == "clinicos":
                 st.success("Novo paciente cadastrado!")
 
     
+
 
 
 
