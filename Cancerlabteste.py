@@ -2528,7 +2528,7 @@ def page_partners():
         },
         {
             "name": "Green Nanotechnology Laboratory (NaVe)",
-            "website": "https://nanotecnologiaverde.complexonano.com/sobre-nos/",
+            "website": "https://nanotecnologiaverde.com",
             "logo": "nave.jpg",
             "country": "UnB – Brazil",
             "summary": "Multi-user lab focused on nanomaterials and nanosystems for health and environment",
@@ -4240,6 +4240,7 @@ elif st.session_state.page == "clinicos":
                 st.success("Novo paciente cadastrado!")
 
     
+
 
 
 
