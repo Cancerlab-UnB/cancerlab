@@ -4,3 +4,4 @@ backgroundColor = "#FFFFFF"
 secondaryBackgroundColor = "#FFFFFF"
 textColor = "#0f172a"
 primaryColor = "#1351d8"
+hideTopBar = true
