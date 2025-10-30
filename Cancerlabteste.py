@@ -3028,19 +3028,19 @@ def page_news():
             "thumb": None,  # e.g. "static/news/fapdf_oct2025.jpg"
         },
         {
-            "kind": "video",
-            "url": "https://www.youtube.com/watch?v=xiiLgiTCiZM",
-            "date_iso": "2025-10-09",
-            "title": "Pink October | Globo TV Interview",
-            "dek": "Our team discusses ongoing breast cancer research in a special Globo TV interview",
-        },
-        {
             "kind": "press",
             "url": "https://noticias.unb.br/artigos-main/8116-outubro-rosa-o-elo-entre-pesquisa-sociedade-e-a-luta-contra-o-cancer-de-mama",
             "date_iso": "2025-10-17",
             "title": "Outubro Rosa: o elo entre pesquisa, sociedade e a luta contra o câncer de mama",
             "dek": "Nossos pesquisadores investigam novas estratégias para frear o câncer de mama e fortalecer a conscientização",
             "thumb": None,  # e.g. "static/news/fapdf_oct2025.jpg"
+        },
+        {
+            "kind": "video",
+            "url": "https://www.youtube.com/watch?v=xiiLgiTCiZM",
+            "date_iso": "2025-10-09",
+            "title": "Pink October | Globo TV Interview",
+            "dek": "Our team discusses ongoing breast cancer research in a special Globo TV interview",
         },
     ]
 
@@ -4800,6 +4800,7 @@ elif st.session_state.page == "clinicos":
                 st.success("Novo paciente cadastrado!")
 
     
+
 
 
 
