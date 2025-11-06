@@ -1802,7 +1802,7 @@ def page_publications():
       {
         "authors": "Davi Trombini Aleixoa, Estael L. C. Cruz-Cazarim, Kezia C. B. Ferreira, Lívia N. Grossi, Wilson R. Braz, Natália P. Silva, Fábio Pittella-Silva, Marina F. Dias, Silvia L. Fialho, Guilherme D. Tavares, Frederico Pittella",
         "title": "Breakthroughs in the nanoparticle-mediated delivery of siRNA for breast cancer treatment",
-        "journal": "Journal of Cancer Science & Therapy",
+        "journal": "Nanomedicine",
         "year": 2025,
         "url": "https://doi.org/10.1080/17435889.2025.2567842",
         "doi": "10.1080/17435889.2025.2567842"
@@ -4800,6 +4800,7 @@ elif st.session_state.page == "clinicos":
                 st.success("Novo paciente cadastrado!")
 
     
+
 
 
 
