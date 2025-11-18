@@ -7,7 +7,6 @@ Created on Fri Jun 27 18:58:02 2025
 
 import streamlit as st
 import json
-import openai
 import html as _html
 import html, urllib.parse, mimetypes, base64
 import pandas as pd
@@ -5711,6 +5710,7 @@ elif st.session_state.page == "clinicos":
                 st.success("Novo paciente cadastrado!")
 
     
+
 
 
 
