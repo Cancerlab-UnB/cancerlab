@@ -3641,7 +3641,7 @@ if st.session_state.page == "login":
 
 
 # CRIAÇÃO DE CONTA ----
-elif st.session_state.page == "criar_conta":
+# elif st.session_state.page == "criar_conta":
     st.title("Criar nova conta")
     nome = st.text_input("Nome completo")
     CPF = st.text_input("CPF")
@@ -3671,7 +3671,7 @@ elif st.session_state.page == "criar_conta":
         _set_param(page="login")
         st.rerun()
 
-elif st.session_state.page == "reset":
+# elif st.session_state.page == "reset":
     st.title("Definir nova senha")
     token = st.session_state.reset_token
 
@@ -5911,6 +5911,7 @@ elif st.session_state.page == "clinicos":
                 st.success("Novo paciente cadastrado!")
 
     
+
 
 
 
