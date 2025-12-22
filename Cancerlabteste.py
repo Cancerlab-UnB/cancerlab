@@ -3640,72 +3640,7 @@ if st.session_state.page == "login":
 
 
 
-# CRIAÇÃO DE CONTA ----
-# elif st.session_state.page == "criar_conta":
-    st.title("Criar nova conta")
-    nome = st.text_input("Nome completo")
-    CPF = st.text_input("CPF")
-    email = st.text_input("Email")
-    senha = st.text_input("Senha", type="password")
-    perfil = st.radio("Tipo de usuário", ["aluno", "servidor"])
 
-    if st.button("Registrar"):
-        try:
-            if usuario_existe(CPF):
-                st.error("Matrícula já cadastrada!")
-            elif not (nome and CPF and email and senha):
-                st.error("Preencha todos os campos!")
-            else:
-                hashed = bcrypt.hashpw(senha.encode(), bcrypt.gensalt()).decode()
-                usuario = {"CPF": CPF, "nome": nome, "email": email, "senha": hashed, "perfil": perfil}
-                salvar_usuario(usuario)
-                st.success("Conta criada com sucesso! Faça login.")
-                st.session_state.page = "login"
-                _set_param(page="login")   # >>> URL coerente para o login <<<
-                st.rerun()
-        except Exception as e:
-            st.error(f"Erro ao registrar: {e}")
-
-    if st.button("Voltar para login"):
-        st.session_state.page = "login"
-        _set_param(page="login")
-        st.rerun()
-
-# elif st.session_state.page == "reset":
-    st.title("Definir nova senha")
-    token = st.session_state.reset_token
-
-    if not token:
-        st.error("Link inválido ou ausente. Solicite novamente a recuperação de senha.")
-        if st.button("Voltar para solicitar link"):
-            st.session_state.page = "reset_request"
-            st.rerun()
-    else:
-        rec = validate_reset_token(token)
-        if not rec:
-            st.error("Este link é inválido, já foi utilizado ou expirou.")
-            if st.button("Solicitar novo link"):
-                st.session_state.page = "reset_request"
-                st.rerun()
-        else:
-            nova = st.text_input("Nova senha", type="password")
-            conf = st.text_input("Confirmar nova senha", type="password")
-            if st.button("Salvar nova senha"):
-                if not nova or not conf:
-                    st.warning("Preencha a nova senha e a confirmação.")
-                elif nova != conf:
-                    st.error("As senhas não conferem.")
-                elif len(nova) < 6:
-                    st.warning("Use uma senha com pelo menos 6 caracteres.")
-                else:
-                    update_user_password(rec["user_id"], nova)
-                    mark_token_used(token)
-                    st.success("Senha alterada com sucesso! Faça login.")
-                    # Limpa token em memória
-                    st.session_state.reset_token = None
-                    if st.button("Ir para o login"):
-                        st.session_state.page = "login"
-                        st.rerun()
 
 # PÁGINA INICIAL
 elif st.session_state.page == "index":
@@ -5911,6 +5846,7 @@ elif st.session_state.page == "clinicos":
                 st.success("Novo paciente cadastrado!")
 
     
+
 
 
 
