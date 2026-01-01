@@ -42,7 +42,6 @@ CANDIDATES = [
     "imghome2.jpg",
     "landmarks.jpg",
     "static/imgfront.png",
-    "static/anniversary13.jpg",
     # adicione mais se quiser...
 ]
 
@@ -675,188 +674,6 @@ def render_navbar(active: str = "home", unbimg: str | None = None):
 
 
 
-def show_anniversary_cta(
-    image_relpath: str = "static/anniversary13.jpg",
-    caption: str = "🎈 13 years of scientific innovation",
-):
-    import base64, uuid, mimetypes
-    from pathlib import Path
-    from urllib.parse import urlencode
-    import streamlit as st
-
-    def _get_params():
-        try:  # >= 1.32
-            qp = st.query_params
-            out = {k: (qp.get(k) if not isinstance(qp.get(k), list) else qp.get(k)[-1]) for k in qp}
-        except Exception:  # legacy
-            qp = st.experimental_get_query_params()
-            out = {k: (v[-1] if isinstance(v, list) else v) for k, v in qp.items()}
-        return {k: v for k, v in out.items() if v is not None}
-
-    params = _get_params()
-    if params.get("dismiss_anniv") == "1":
-        return  
-
-    def _img_uri(p: Path) -> str:
-        try:
-            return cached_img_uri(str(p))  # type: ignore[name-defined]
-        except Exception:
-            mime = mimetypes.guess_type(str(p))[0] or "image/jpeg"
-            b64  = base64.b64encode(p.read_bytes()).decode()
-            return f"data:{mime};base64,{b64}"
-
-    p = Path(image_relpath)
-    if not p.exists():
-        return
-
-    data = _img_uri(p)
-    uid  = f"anni{uuid.uuid4().hex[:7]}"
-
-    hidden_inputs = "\n".join(
-        f'<input type="hidden" name="{k}" value="{v}"/>'
-        for k, v in params.items()
-        if k != "dismiss_anniv"
-    )
-    hidden_inputs += '\n<input type="hidden" name="dismiss_anniv" value="1"/>'
-
-    st.markdown(
-        f"""
-<style>
-  :root {{
-    --anni-accent: var(--bar-bg, #3f5eb5);
-    --anni-ink: #0f172a; --anni-line: #e6eaf2;
-  }}
-  .{uid}-modal {{
-    position: fixed; inset:0; z-index: 4000;
-    display:grid; place-items:center;
-  }}
-  .{uid}-backdrop-btn {{
-    position:absolute; inset:0; border:none; background: rgba(2,6,23,.28);
-    backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px);
-    cursor:pointer;
-  }}
-  .{uid}-card {{
-    position:relative; width:min(92vw, 720px);
-    background:#fff; color:var(--anni-ink);
-    border:1px solid var(--anni-line); border-radius:18px; overflow:hidden;
-    box-shadow:0 22px 48px rgba(2,6,23,.22);
-    transform:translateY(12px) scale(.985); animation:{uid}-pop .24s ease forwards;
-  }}
-  @keyframes {uid}-pop {{ to {{ transform:translateY(0) scale(1); }} }}
-  .{uid}-close-btn {{
-    position:absolute; right:12px; top:12px; width:36px; height:36px; border-radius:999px;
-    display:inline-flex; align-items:center; justify-content:center;
-    background:#fff; border:1px solid var(--anni-line);
-    box-shadow:0 8px 16px rgba(2,6,23,.12);
-    font-weight:900; color:var(--anni-ink); cursor:pointer;
-  }}
-  .{uid}-head {{
-    padding:14px 18px 0 18px; font-weight:800; letter-spacing:.2px; color:var(--anni-accent);
-    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
-  }}
-  .{uid}-body {{ padding:10px 18px 18px 18px; }}
-  .{uid}-img {{
-    display:block; width:100%; height:auto; max-height:72vh; object-fit:contain;
-    border-radius:12px; border:1px solid var(--anni-line);
-    box-shadow:0 10px 24px rgba(2,6,23,.08);
-  }}
-  /* Balões */
-  .{uid}-balloons {{ position:absolute; inset:0; overflow:hidden; pointer-events:none; }}
-  .{uid}-balloon {{
-    position:absolute; bottom:-20vh; width:36px; height:48px; border-radius:50% 50% 45% 55%;
-    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.8) 0 14%, transparent 15%),
-                var(--anni-accent);
-    box-shadow: inset -6px -10px 18px rgba(0,0,0,.08);
-    animation: {uid}-float 9s linear infinite;
-  }}
-  .{uid}-balloon::after {{
-    content:""; position:absolute; left:50%; transform:translateX(-50%);
-    bottom:-22px; width:2px; height:28px; background: rgba(0,0,0,.18);
-  }}
-  @keyframes {uid}-float {{
-    0% {{ transform: translateY(0) translateX(0) rotate(1deg); }}
-    25% {{ transform: translateY(-20vh) translateX(-10px) rotate(-2deg); }}
-    50% {{ transform: translateY(-40vh) translateX(6px) rotate(2deg); }}
-    75% {{ transform: translateY(-60vh) translateX(-6px) rotate(-1deg); }}
-    100%{{ transform: translateY(-85vh) translateX(0) rotate(0deg); }}
-  }}
-  .{uid}-b1 {{ left:10%; animation-duration: 10s; animation-delay: -1s; }}
-  .{uid}-b2 {{ left:25%; animation-duration: 9.5s; animation-delay: -3s; }}
-  .{uid}-b3 {{ left:40%; animation-duration: 11s; animation-delay: -2s; }}
-  .{uid}-b4 {{ left:60%; animation-duration: 10.5s; animation-delay: -4s; }}
-  .{uid}-b5 {{ left:75%; animation-duration: 9s; animation-delay: -1.5s; }}
-  .{uid}-b6 {{ left:88%; animation-duration: 12s; animation-delay: -3.5s; }}
-  /* Fogos */
-  .{uid}-fireworks {{ position:absolute; inset:0; pointer-events:none; }}
-  .{uid}-fw {{
-    position:absolute; width:2px; height:2px; left:50%; top:50%;
-    background: transparent;
-    box-shadow:
-      0 0 0 2px rgba(255,255,255,.0),
-      0 -16px 0 2px rgba(255, 214, 0, .95),
-      14px -8px 0 2px rgba(255, 102, 0, .95),
-      16px 0 0 2px rgba(0, 153, 255, .95),
-      14px 8px 0 2px rgba(0, 227, 150, .95),
-      0 16px 0 2px rgba(255, 0, 128, .95),
-      -14px 8px 0 2px rgba(153, 102, 255, .95),
-      -16px 0 0 2px rgba(255, 88, 88, .95),
-      -14px -8px 0 2px rgba(0, 214, 170, .95);
-    border-radius:50%; transform: translate(-50%, -50%) scale(0.2);
-    opacity:0; animation:{uid}-boom 2.2s ease-out infinite;
-  }}
-  .{uid}-fw.fw2 {{ animation-delay: .8s; }}
-  .{uid}-fw.fw3 {{ animation-delay: 1.6s; }}
-  @keyframes {uid}-boom {{
-    0%   {{ opacity: 0; transform: translate(-50%, -50%) scale(0.2); }}
-    10%  {{ opacity: 1; transform: translate(-50%, -50%) scale(1); }}
-    50%  {{ opacity: .9; }}
-    100% {{ opacity: 0; transform: translate(-50%, -50%) scale(0.1); }}
-  }}
-  .{uid}-fw.pos1 {{ left: 18%; top: 24%; }}
-  .{uid}-fw.pos2 {{ left: 82%; top: 22%; }}
-  .{uid}-fw.pos3 {{ left: 50%; top: 10%; }}
-
-  @media (max-width: 540px) {{
-    .{uid}-head {{ padding-top: 12px; }}
-    .{uid}-body {{ padding: 10px 12px 14px 12px; }}
-  }}
-</style>
-<form method="get" class="{uid}-modal" role="dialog" aria-modal="true" aria-label="Pop-up de Aniversário">
-  {hidden_inputs}
-  <!-- backdrop clicável que envia o form (fecha) -->
-  <button class="{uid}-backdrop-btn" type="submit" aria-hidden="true"></button>
-  <!-- camadas decorativas -->
-  <div class="{uid}-balloons">
-    <div class="{uid}-balloon {uid}-b1"></div>
-    <div class="{uid}-balloon {uid}-b2"></div>
-    <div class="{uid}-balloon {uid}-b3"></div>
-    <div class="{uid}-balloon {uid}-b4"></div>
-    <div class="{uid}-balloon {uid}-b5"></div>
-    <div class="{uid}-balloon {uid}-b6"></div>
-  </div>
-  <div class="{uid}-fireworks">
-    <div class="{uid}-fw pos1"></div>
-    <div class="{uid}-fw pos2 fw2"></div>
-    <div class="{uid}-fw pos3 fw3"></div>
-  </div>
-  <!-- cartão -->
-  <div class="{uid}-card">
-    <button class="{uid}-close-btn" type="submit" title="Fechar">✕</button>
-    <div class="{uid}-head">{caption}</div>
-    <div class="{uid}-body">
-      <img class="{uid}-img" src="{data}" alt="Aniversário CancerLab" loading="eager" decoding="async" />
-    </div>
-  </div>
-</form>
-        """,
-        unsafe_allow_html=True,
-    )
-
-
-
-
-
-
 
 
 
@@ -865,7 +682,6 @@ def show_anniversary_cta(
 
 def page_home():
 # On the home page (where you want the CTA button to appear)
-    show_anniversary_cta("static/anniversary13.jpg")
     left_img = cached_img_uri("imghome1.jpg", mime="image/jpeg")
     right_img = cached_img_uri("imghome2.jpg", mime="image/jpeg")
     landmarks_img = cached_img_uri("landmarks.jpg", mime="image/jpeg")
@@ -5846,6 +5662,7 @@ elif st.session_state.page == "clinicos":
                 st.success("Novo paciente cadastrado!")
 
     
+
 
 
 
