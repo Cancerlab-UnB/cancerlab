@@ -6084,30 +6084,30 @@ elif st.session_state.page == "biopsia":
     with cols_bxl[1]:
         st.caption("Observação opcional junto com a data.")
     
-        # -------- Edição dos dados do paciente (AUTOSAVE SEM BOTÃO) --------
-        st.markdown("---")
-        st.subheader("Editar dados do paciente")
-        st.caption("Qualquer alteração aqui é gravada automaticamente.")
-    
-        def _on_edit_field_change(col_name: str, widget_key: str, idx_patient: int):
-            novo_val = st.session_state.get(widget_key, "")
-            st.session_state.df_biopsia.at[idx_patient, col_name] = novo_val
-    
-            if ("bxl" in str(col_name).lower()) or ("cirurgia" in str(col_name).lower()):
-                if _auto_preencher_datas_futuras(idx_patient):
-                    _mark_dirty()
-    
-            _mark_dirty()
-    
-        for coluna, valor in dados_paciente.items():
-            wkey = f"edit_{coluna}_{paciente_selecionado}_{idx}_biopsia"
-            st.text_input(
-                coluna,
-                value=str("" if pd.isna(valor) else valor),
-                key=wkey,
-                on_change=_on_edit_field_change,
-                args=(coluna, wkey, idx)
-            )
+    # -------- Edição dos dados do paciente (AUTOSAVE SEM BOTÃO) --------
+    st.markdown("---")
+    st.subheader("Editar dados do paciente")
+    st.caption("Qualquer alteração aqui é gravada automaticamente.")
+
+    def _on_edit_field_change(col_name: str, widget_key: str, idx_patient: int):
+        novo_val = st.session_state.get(widget_key, "")
+        st.session_state.df_biopsia.at[idx_patient, col_name] = novo_val
+
+        if ("bxl" in str(col_name).lower()) or ("cirurgia" in str(col_name).lower()):
+            if _auto_preencher_datas_futuras(idx_patient):
+                _mark_dirty()
+
+        _mark_dirty()
+
+    for coluna, valor in dados_paciente.items():
+        wkey = f"edit_{coluna}_{paciente_selecionado}_{idx}_biopsia"
+        st.text_input(
+            coluna,
+            value=str("" if pd.isna(valor) else valor),
+            key=wkey,
+            on_change=_on_edit_field_change,
+            args=(coluna, wkey, idx)
+        )
 
     # =================== Salvar na planilha (persistência manual – mantido, mas agora é opcional) ===================
     st.markdown("---")
@@ -6587,6 +6587,7 @@ elif st.session_state.page == "clinicos":
                 st.success("Novo paciente cadastrado!")
 
     
+
 
 
 
