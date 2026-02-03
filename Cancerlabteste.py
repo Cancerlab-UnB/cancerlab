@@ -4371,6 +4371,7 @@ elif st.session_state.page == "index":
         - WhatsApp:
           - Detecta colunas de telefone/whatsapp
           - Extrai múltiplos números, normaliza para 55DDDNXXXXXXXX e gera link wa.me com templates
+          - (AJUSTE) Só permite WhatsApp para coletas de HOJE até +30 dias (não inclui atrasadas)
         """
     
         import re
@@ -4405,6 +4406,10 @@ elif st.session_state.page == "index":
             st.session_state["reg_version_bxl"] = 0
         if "bxl_auto_guard" not in st.session_state:
             st.session_state["bxl_auto_guard"] = {"day": "", "keys": set()}
+    
+        # (novo) guard WhatsApp para resetar texto automaticamente sem bug de key
+        if "wa_bxl_guard" not in st.session_state:
+            st.session_state["wa_bxl_guard"] = {"sig": ""}
     
         # ============================================================
         # Helpers: string / normalização
@@ -4473,9 +4478,6 @@ elif st.session_state.page == "index":
             return 2000 + yy if yy <= 69 else 1900 + yy
     
         def _infer_year_for_ddmm(d, m, today_):
-            # dd/mm sem ano:
-            # - se até 7 dias no passado => mantém (permite ontem etc.)
-            # - se mais antigo => assume próxima ocorrência (ano seguinte)
             y = today_.year
             try:
                 cand = date(y, m, d)
@@ -4553,6 +4555,14 @@ elif st.session_state.page == "index":
             return _extract_first_date_from_string(str(x), today_)
     
         # ============================================================
+        # (NOVO) Tag atrasada: baseado APENAS no texto da célula
+        # ============================================================
+        def _has_late_tag(raw):
+            s = ("" if raw is None else str(raw)).strip().lower()
+            # pega "(atrasada)" ou "(atrasado)" em qualquer variação
+            return ("(atrasad" in s)
+    
+        # ============================================================
         # Registro: ler / status map
         # ============================================================
         def _read_registro_df(wb):
@@ -4628,32 +4638,55 @@ elif st.session_state.page == "index":
             return col_map
     
         def _apply_cell_mark(ws, cell_ref, d, status, motivo, obs):
+            """
+            Marca a célula original no Excel.
+            - REGISTRADA: escreve datetime real (dd/mm/yy)
+            - ATRASADA/ATRASADO: escreve TEXTO "dd/mm/yy (atrasada)"
+            """
+            import re
+            from datetime import datetime
+        
+            if not cell_ref:
+                raise ValueError("cell_ref vazio (não dá pra marcar no Excel).")
+        
             cell = ws[cell_ref]
-            stt = (status or "").upper()
-    
-            # escreve data "real" no Excel e formata dd/mm/yy
-            cell.value = datetime(d.year, d.month, d.day)
-            cell.number_format = "dd/mm/yy"
-    
-            if stt == "REGISTRADA":
-                cell.fill = FILL_REG
-                cell.font = FONT_BOLD
-            elif stt == "ATRASADA":
+        
+            # normaliza status (tolerante a variações)
+            stt_raw = "" if status is None else str(status)
+            stt = re.sub(r"\s+", " ", stt_raw).strip().upper()
+        
+            # aceita ATRASADA / ATRASADO / qualquer coisa que contenha "ATRASAD"
+            is_late = ("ATRASAD" in stt)
+        
+            if is_late:
+                # escreve como TEXTO pra garantir que o sufixo apareça no Excel
+                cell.value = f"{d.strftime('%d/%m/%y')} (atrasada)"
+                cell.number_format = "@"
                 cell.fill = FILL_LATE
                 cell.font = FONT_BOLD
             else:
-                cell.fill = PatternFill()
-                cell.font = FONT_NORMAL
-    
+                # data real
+                cell.value = datetime(d.year, d.month, d.day)
+                cell.number_format = "dd/mm/yy"
+        
+                if stt == "REGISTRADA":
+                    cell.fill = FILL_REG
+                    cell.font = FONT_BOLD
+                else:
+                    cell.fill = PatternFill()
+                    cell.font = FONT_NORMAL
+        
+            # comentário
             now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            txt = "{} | {}\n{}".format(stt, now, motivo).strip()
+            txt = "{} | {}\n{}".format(stt if stt else ("ATRASADA" if is_late else "PENDENTE"), now, motivo).strip()
             if obs:
-                txt += "\nObs: {}".format(obs.strip())
+                txt += "\nObs: {}".format(str(obs).strip())
+        
             try:
                 cell.comment = Comment(txt[:700], "AgendaBxL")
             except Exception:
                 pass
-    
+
         def _save_status_to_excel(cbl, coleta_short, dd, status, motivo, obs, sheet_name, cell_ref):
             wb = openpyxl.load_workbook(file_path)
             ws_reg = _ensure_reg_sheet(wb)
@@ -4770,6 +4803,7 @@ elif st.session_state.page == "index":
                     head = headers[bc - 1] or "BxL_{}".format(bc)
                     cell = ws.cell(row=r, column=bc)
                     raw = cell.value
+                    raw_str = "" if raw is None else str(raw).strip()
     
                     dd = _extract_date(raw, today_=today_, epoch=epoch)
                     if not dd:
@@ -4785,7 +4819,8 @@ elif st.session_state.page == "index":
                         "Dias": (dd - today_).days,
                         "Sheet": sheet_name,
                         "Cell": cell.coordinate,
-                        "Raw": "" if raw is None else str(raw).strip(),
+                        "Raw": raw_str,
+                        "LateTag": _has_late_tag(raw_str),   # (NOVO) atraso por TAG na célula
                     })
     
             df = pd.DataFrame(events)
@@ -4805,7 +4840,118 @@ elif st.session_state.page == "index":
             return df, phones_map, headers, phone_cols, df_reg, smap
     
         # ============================================================
-        # WhatsApp — painel robusto
+        # (NOVO) Painel de Pacientes: cadastrados, excluídos, motivos
+        # ============================================================
+        def painel_pacientes(sheet_name):
+            st.divider()
+            st.markdown("### Painel de Pacientes (cadastro / exclusões)")
+    
+            try:
+                wb = openpyxl.load_workbook(file_path, data_only=True)
+                if sheet_name not in wb.sheetnames:
+                    st.warning("Aba não encontrada para painel de pacientes.")
+                    return
+                ws = wb[sheet_name]
+            except Exception as e:
+                st.warning(f"Falha ao ler planilha para painel de pacientes: {e}")
+                return
+    
+            # cabeçalhos
+            headers = []
+            for c in range(1, ws.max_column + 1):
+                v = ws.cell(row=1, column=c).value
+                headers.append("" if v is None else str(v).strip())
+    
+            def _find_col(pred):
+                for idx, h in enumerate(headers, start=1):
+                    if pred(_norm(h)):
+                        return idx
+                return None
+    
+            col_id = _find_col(lambda x: ("cbl" in x) or ("id" in x and "paciente" in x))
+            col_status = _find_col(lambda x: ("status" in x and "estudo" in x) or ("status" in x and "study" in x))
+            col_data_exc = _find_col(lambda x: ("data" in x and "exclus" in x))
+            col_motivo = _find_col(lambda x: ("motivo" in x and "exclus" in x))
+    
+            if not col_id:
+                st.info("Não encontrei a coluna de ID/CBL nesta aba para montar o painel de pacientes.")
+                return
+    
+            rows = []
+            today_ = date.today()
+            epoch = wb.epoch
+    
+            for r in range(2, ws.max_row + 1):
+                rid = ws.cell(row=r, column=col_id).value
+                if rid is None or str(rid).strip() == "":
+                    continue
+    
+                cbl = _normalize_cbl(rid)
+                status = "" if not col_status else (ws.cell(row=r, column=col_status).value or "")
+                motivo = "" if not col_motivo else (ws.cell(row=r, column=col_motivo).value or "")
+                d_exc_raw = "" if not col_data_exc else ws.cell(row=r, column=col_data_exc).value
+    
+                d_exc = _extract_date(d_exc_raw, today_=today_, epoch=epoch)
+    
+                status_s = str(status).strip()
+                motivo_s = str(motivo).strip()
+    
+                excl_flag = False
+                if status_s and ("exclu" in status_s.lower()):
+                    excl_flag = True
+                if motivo_s and motivo_s.lower() not in ("nan", "na", "n/a", "-"):
+                    excl_flag = True
+                if d_exc is not None:
+                    excl_flag = True
+    
+                rows.append({
+                    "CBL": cbl,
+                    "Status_estudo": status_s,
+                    "Data_exclusao": d_exc.strftime("%d/%m/%y") if d_exc else "",
+                    "Motivo_exclusao": motivo_s,
+                    "Excluido": excl_flag
+                })
+    
+            dfp = pd.DataFrame(rows)
+            if dfp.empty:
+                st.info("Sem pacientes encontrados nesta aba.")
+                return
+    
+            # métricas por CBL (evita duplicados)
+            dfp_u = dfp.drop_duplicates(subset=["CBL"]).copy()
+            total = int(dfp_u["CBL"].nunique())
+            excl = int(dfp_u[dfp_u["Excluido"] == True]["CBL"].nunique())
+            ativos = total - excl
+    
+            c1, c2, c3 = st.columns(3)
+            c1.metric("Pacientes cadastrados", total)
+            c2.metric("Excluídos", excl)
+            c3.metric("Ativos", ativos)
+    
+            # motivos
+            if "Motivo_exclusao" in dfp_u.columns:
+                motivos = dfp_u[dfp_u["Excluido"] == True]["Motivo_exclusao"].replace("", np.nan).dropna()
+                if not motivos.empty:
+                    vc = motivos.value_counts().reset_index()
+                    vc.columns = ["Motivo", "Qtd"]
+                    st.markdown("#### Motivos de exclusão")
+                    st.dataframe(vc, use_container_width=True, hide_index=True)
+    
+            # lista de excluídos
+            st.markdown("#### Pacientes excluídos (detalhes)")
+            df_exc = dfp_u[dfp_u["Excluido"] == True].copy()
+            if df_exc.empty:
+                st.info("Nenhum excluído detectado nesta aba.")
+            else:
+                st.dataframe(
+                    df_exc[["CBL", "Data_exclusao", "Motivo_exclusao", "Status_estudo"]],
+                    use_container_width=True,
+                    hide_index=True,
+                    height=260
+                )
+    
+        # ============================================================
+        # WhatsApp — painel robusto (AJUSTADO: apenas 0..30)
         # ============================================================
         def painel_whatsapp_bxl(df_all_events, phones_map, headers, phone_cols):
             import re
@@ -4813,10 +4959,7 @@ elif st.session_state.page == "index":
             import pandas as pd
             import streamlit as st
             from urllib.parse import quote
-        
-            # ---------------------------
-            # Helpers de telefone
-            # ---------------------------
+    
             def _extract_phones(raw):
                 if raw is None or (isinstance(raw, float) and np.isnan(raw)):
                     return []
@@ -4826,19 +4969,19 @@ elif st.session_state.page == "index":
                 s = s.replace("\n", " ").replace("\t", " ")
                 s = re.sub(r"[;,/|]+", " ", s)
                 s = re.sub(r"\s+", " ", s).strip()
-        
+    
                 candidates = re.findall(
                     r"(?:\+?\s*55\s*)?\(?\s*(\d{2})\s*\)?\s*(9?\d{4})[-\s]?(\d{4})",
                     s
                 )
-        
+    
                 out = []
                 for ddd, p1, p2 in candidates:
                     n = "{}{}{}".format(ddd, p1, p2)
                     if 10 <= len(n) <= 11 and n not in out:
                         out.append(n)
                 return out
-        
+    
             def _normalize_to_e164_br(digits):
                 p = re.sub(r"\D", "", str(digits or ""))
                 if not p:
@@ -4848,7 +4991,7 @@ elif st.session_state.page == "index":
                 if 10 <= len(p) <= 11:
                     return "55" + p
                 return ""
-        
+    
             def _format_phone_br(digits):
                 p = re.sub(r"\D", "", str(digits or ""))
                 if p.startswith("55"):
@@ -4858,77 +5001,44 @@ elif st.session_state.page == "index":
                 if len(p) == 11:
                     return "({}) {}-{}".format(p[:2], p[2:7], p[7:])
                 return str(digits)
-        
+    
             def _wa_link(phone_e164_no_plus, msg):
                 if not phone_e164_no_plus:
                     return ""
                 return "https://wa.me/{}?text={}".format(phone_e164_no_plus, quote(msg or ""))
-        
-            # ---------------------------
-            # UI
-            # ---------------------------
+    
             st.divider()
             st.markdown("### WhatsApp — Enviar mensagens")
-            st.caption("")
-        
+            st.caption("Apenas coletas de hoje até +30 dias (não inclui atrasadas).")
+    
             if df_all_events is None or df_all_events.empty:
                 st.info("Sem eventos para WhatsApp.")
                 return
-        
-            # ---------------------------
-            # Normalização defensiva
-            # ---------------------------
+    
             df = df_all_events.copy()
-        
             if "Dias" not in df.columns:
                 df["Dias"] = np.nan
             if "Status" not in df.columns:
                 df["Status"] = "PENDENTE"
             if "Status_display" not in df.columns:
                 df["Status_display"] = df["Status"].astype(str)
-        
-            if "Data_str" not in df.columns:
-                if "Data" in df.columns:
-                    def _fmt(d):
-                        try:
-                            return d.strftime("%d/%m/%y")
-                        except Exception:
-                            return ""
-                    df["Data_str"] = df["Data"].apply(_fmt)
-                else:
-                    df["Data_str"] = ""
-        
-            if "Coleta_short" not in df.columns:
-                df["Coleta_short"] = df.get("Coleta", "").astype(str)
-        
+    
             df["Status"] = df["Status"].astype(str).str.upper()
-            df["Status_display"] = df["Status_display"].astype(str)
-        
-            # ---------------------------
-            # ✅ FILTRO ÚNICO (sem segregação):
-            #    - FUTURAS 0..30 e NÃO REGISTRADAS
-            #    - ATRASADAS: marcadas ATRASADA OU janela -7..-1
-            #    - REGISTRADAS nunca entram
-            # ---------------------------
             dias_num = pd.to_numeric(df["Dias"], errors="coerce")
+    
+            # (AJUSTE) Só 0..30 e NÃO REGISTRADA e NÃO ATRASADA (tag/célula)
             status_mix = (df["Status_display"].astype(str) + " " + df["Status"].astype(str)).str.upper()
-        
             is_reg = status_mix.str.contains("REGISTRADA", na=False)
-        
-            is_atrasada_marcada = status_mix.str.contains("ATRASADA", na=False)
-            is_atraso_janela = dias_num.between(-7, -1, inclusive="both")
-        
+            is_late = status_mix.str.contains("ATRASADA", na=False) | df.get("LateTag", False).astype(bool)
+    
             is_futura_0_30 = dias_num.between(0, 30, inclusive="both")
-        
-            df_src = df[(~is_reg) & (is_futura_0_30 | is_atrasada_marcada | is_atraso_janela)].copy()
-        
+            df_src = df[(~is_reg) & (~is_late) & (is_futura_0_30)].copy()
+    
             if df_src.empty:
-                st.info("Nenhuma coleta disponível")
+                st.info("Nenhuma coleta elegível (0..30 dias) para WhatsApp.")
                 return
-        
-            # ---------------------------
+    
             # Colunas de telefone detectadas
-            # ---------------------------
             if phone_cols and isinstance(headers, list) and len(headers) > 0:
                 phone_colnames = [(headers[pc - 1] if (pc - 1) < len(headers) else f"Telefone_{pc}") for pc in phone_cols]
                 phone_colnames = [
@@ -4937,9 +5047,9 @@ elif st.session_state.page == "index":
                 ]
             else:
                 phone_colnames = ["Telefone"]
-        
-            wa_scope = "wa_bxl_all_in_one"
-        
+    
+            wa_scope = "wa_bxl_0_30"
+    
             c1, c2 = st.columns([1.2, 1.0])
             with c1:
                 cbl_options = sorted(df_src["CBL"].dropna().astype(str).unique().tolist())
@@ -4949,17 +5059,16 @@ elif st.session_state.page == "index":
                 sel_cbl = st.selectbox("CBL (paciente)", options=cbl_options, index=0, key=f"{wa_scope}_cbl")
             with c2:
                 sel_phone_col = st.selectbox("Coluna de contato", options=phone_colnames, index=0, key=f"{wa_scope}_phonecol")
-        
-            # eventos desse CBL (apenas os elegíveis: futuras 0-30 ou atrasadas)
+    
             ev = df_src[df_src["CBL"].astype(str) == str(sel_cbl)].copy()
             if "Data" in ev.columns:
                 ev = ev.sort_values(["Data"], ascending=True)
             ev = ev.reset_index(drop=True)
-        
+    
             if ev.empty:
                 st.info("Não há eventos elegíveis para este CBL.")
                 return
-        
+    
             def _safe_int(x, default=0):
                 try:
                     if pd.isna(x):
@@ -4967,38 +5076,34 @@ elif st.session_state.page == "index":
                     return int(float(x))
                 except Exception:
                     return default
-        
-            # Label com D+ / D-
+    
             ev["Label"] = ev.apply(
-                lambda r: "{} — {} — {} (D{})".format(
+                lambda r: "{} — {} (D{})".format(
                     str(r.get("Coleta_short", "")).strip(),
                     str(r.get("Data_str", "")).strip(),
-                    str(r.get("Status_display", r.get("Status", ""))).strip(),
                     _safe_int(r.get("Dias", 0), 0)
                 ),
                 axis=1
             )
-        
+    
             sel_label = st.selectbox("Evento (coleta)", options=ev["Label"].tolist(), index=0, key=f"{wa_scope}_event")
             row = ev[ev["Label"] == sel_label].iloc[0]
-        
-            # ---------------------------
+    
             # Telefone
-            # ---------------------------
             raw_contact = ""
             if isinstance(phones_map, dict) and sel_cbl in phones_map:
                 try:
                     raw_contact = phones_map[sel_cbl].get(sel_phone_col, "") or ""
                 except Exception:
                     raw_contact = ""
-        
+    
             phones = _extract_phones(raw_contact)
             phones_e164 = []
             for p in phones:
                 e = _normalize_to_e164_br(p)
                 if e:
                     phones_e164.append((e, p))
-        
+    
             if phones_e164:
                 display_opts = ["{}  (→ {})".format(_format_phone_br(p), e) for (e, p) in phones_e164]
                 sel_idx = st.selectbox(
@@ -5015,64 +5120,49 @@ elif st.session_state.page == "index":
                 manual = st.text_input("Telefone manual (DDD + número; opcionalmente com 55)", value="", key=f"{wa_scope}_manual")
                 phone_e164 = _normalize_to_e164_br(manual)
                 phone_disp = _format_phone_br(manual) if manual else ""
-        
-            # ---------------------------
-            # Mensagem (muda automaticamente SOMENTE se atrasada)
-            # ---------------------------
+    
+            # Mensagem (corrigido: reseta quando muda seleção/modelo)
             st.markdown("#### Mensagem")
-        
+    
             template = st.selectbox(
                 "Modelo",
                 ["Lembrete padrão", "Confirmação de presença", "Solicitar reagendamento", "Mensagem neutra"],
                 index=0,
                 key=f"{wa_scope}_template"
             )
-        
+    
             coleta_txt = str(row.get("Coleta_short", "")).strip()
             data_txt = str(row.get("Data_str", "")).strip()
-            dias_txt = _safe_int(row.get("Dias", 0), 0)
-            status_mix_row = (str(row.get("Status_display", "")) + " " + str(row.get("Status", ""))).upper()
-        
-            is_late = (("ATRASADA" in status_mix_row) or (-7 <= dias_txt <= -1)) and ("REGISTRADA" not in status_mix_row)
-        
+    
             if template == "Lembrete padrão":
-                if is_late:
-                    default_msg = (
-                        "Olá! Notei que sua coleta {} estava prevista para {} e ficou em atraso. "
-                        "Você consegue reagendar? Me diga sua disponibilidade, por favor."
-                    ).format(coleta_txt, data_txt)
-                else:
-                    default_msg = (
-                        "Olá! Lembrete: sua coleta {} está agendada para {}. "
-                        "Se precisar reagendar, por favor responda por aqui."
-                    ).format(coleta_txt, data_txt)
-        
+                default_msg = (
+                    "Olá! Lembrete: sua coleta {} está agendada para {}. "
+                    "Se precisar reagendar, por favor responda por aqui."
+                ).format(coleta_txt, data_txt)
             elif template == "Confirmação de presença":
-                if is_late:
-                    default_msg = (
-                        "Olá! Sua coleta {} estava prevista para {}. Podemos reagendar? "
-                        "Me diga sua disponibilidade, por favor."
-                    ).format(coleta_txt, data_txt)
-                else:
-                    default_msg = (
-                        "Olá! Você pode confirmar sua presença para a coleta {} em {}? "
-                        "Se precisar ajustar a data, me avise por aqui."
-                    ).format(coleta_txt, data_txt)
-        
+                default_msg = (
+                    "Olá! Você pode confirmar sua presença para a coleta {} em {}? "
+                    "Se precisar ajustar a data, me avise por aqui."
+                ).format(coleta_txt, data_txt)
             elif template == "Solicitar reagendamento":
                 default_msg = (
                     "Olá! Sobre a coleta {} prevista para {}: você precisa reagendar? "
                     "Se sim, me informe sua disponibilidade."
                 ).format(coleta_txt, data_txt)
-        
             else:
-                default_msg = (
-                    "Olá! Estou entrando em contato sobre sua coleta. Pode me responder por aqui, por favor?"
-                )
-        
-            msg = st.text_area("Texto", value=default_msg, height=120, key=f"{wa_scope}_msg")
+                default_msg = "Olá! Estou entrando em contato sobre sua coleta. Pode me responder por aqui, por favor?"
+    
+            # (CRÍTICO) assinatura para reset do texto
+            sig = f"{sel_cbl}||{sel_label}||{template}"
+            msg_key = f"{wa_scope}_msg"
+    
+            if st.session_state["wa_bxl_guard"].get("sig", "") != sig:
+                st.session_state["wa_bxl_guard"]["sig"] = sig
+                st.session_state[msg_key] = default_msg
+    
+            msg = st.text_area("Texto", height=120, key=msg_key)
             link = _wa_link(phone_e164, msg)
-        
+    
             a1, a2 = st.columns([1.0, 1.0])
             with a1:
                 if not phone_e164:
@@ -5082,14 +5172,10 @@ elif st.session_state.page == "index":
             with a2:
                 st.caption("Contato: {}".format(phone_disp if phone_disp else "—"))
                 st.caption("CBL: {} | Coleta: {} | Data: {}".format(sel_cbl, coleta_txt, data_txt))
-        
+    
             with st.expander("Ver campo bruto da planilha", expanded=False):
                 st.write("Coluna selecionada: {}".format(sel_phone_col))
                 st.code(str(raw_contact))
-
-
-
-
     
         # ============================================================
         # UI principal
@@ -5117,6 +5203,9 @@ elif st.session_state.page == "index":
             st.warning("Nenhuma data BxL encontrada nesta aba.")
             return
     
+        # (NOVO) painel pacientes
+        painel_pacientes(sheet)
+    
         # aplica filtros
         df = df_all.copy()
         if hide_withdrawn and "IN_STUDY" in df.columns:
@@ -5127,25 +5216,19 @@ elif st.session_state.page == "index":
             st.info("Após os filtros, não restaram eventos.")
             return
     
-        # status display / flags atraso
-        df["EmAtrasoSemRegistro"] = (
-            df["Dias"].between(-7, -1, inclusive="both") &
-            (df["Status"] != "REGISTRADA") &
-            (df["Status"] != "ATRASADA")
-        )
-        df["AtrasadaExibicao"] = (
-            df["Dias"].between(-7, -1, inclusive="both") &
-            (df["Status"] != "REGISTRADA")
-        )
-    
+        # ============================================================
+        # Status display (ALTERADO: atrasada por TAG na célula)
+        # ============================================================
         def _status_display(r):
-            stt = str(r["Status"]).upper()
+            stt = str(r.get("Status", "")).upper().strip()
+            late_tag = bool(r.get("LateTag", False))
+    
             if stt == "REGISTRADA":
                 return "REGISTRADA"
+            if late_tag:
+                return "ATRASADA"
             if stt == "ATRASADA":
                 return "ATRASADA"
-            if bool(r["EmAtrasoSemRegistro"]):
-                return "PENDENTE EM ATRASO"
             return stt if stt else "PENDENTE"
     
         df["Status_display"] = df.apply(_status_display, axis=1)
@@ -5156,15 +5239,14 @@ elif st.session_state.page == "index":
                 return "⏰ {}".format(coleta)
             if stt == "REGISTRADA":
                 return "✅ {}".format(coleta)
-            if stt == "PENDENTE EM ATRASO":
-                return "⚠️ {}".format(coleta)
             return "📌 {}".format(coleta)
     
         df["Coleta_show"] = df.apply(lambda r: _prefix_status(r["Status_display"], r["Coleta_short"]), axis=1)
     
-        # recortes
-        atras = df[df["AtrasadaExibicao"] == True].copy().sort_values(["Dias", "Data", "CBL", "Coleta_short"]).reset_index(drop=True)
-        fut = df[(df["Dias"] >= 0) & (df["Dias"] <= 30)].copy().sort_values(["Data", "CBL", "Coleta_short"]).reset_index(drop=True)
+        # recortes (ALTERADO)
+        atras = df[df["Status_display"] == "ATRASADA"].copy().sort_values(["Data", "CBL", "Coleta_short"]).reset_index(drop=True)
+        fut = df[(df["Dias"] >= 0) & (df["Dias"] <= 30) & (df["Status_display"] != "ATRASADA")].copy() \
+                .sort_values(["Data", "CBL", "Coleta_short"]).reset_index(drop=True)
     
         fut_0_7 = fut[(fut["Dias"] >= 0) & (fut["Dias"] <= 7)]
         fut_8_14 = fut[(fut["Dias"] >= 8) & (fut["Dias"] <= 14)]
@@ -5184,7 +5266,7 @@ elif st.session_state.page == "index":
     
         with tabA:
             if atras.empty:
-                st.info("Nenhuma coleta em atraso")
+                st.info("Nenhuma coleta marcada como atrasada na planilha.")
             else:
                 st.dataframe(atras[SHOW_COLS].rename(columns={"Coleta_show": "Coleta", "Status_display": "Status"}),
                              use_container_width=True, hide_index=True, height=420)
@@ -5211,7 +5293,7 @@ elif st.session_state.page == "index":
                              use_container_width=True, hide_index=True, height=420)
     
         # ============================================================
-        # Auto D-1 (persistente e silencioso)
+        # Auto D-1 (mantido) — agora marca a célula como "dd/mm/yy (atrasada)"
         # ============================================================
         today_ = date.today()
         guard_day = today_.isoformat()
@@ -5221,7 +5303,7 @@ elif st.session_state.page == "index":
         auto = df_all[
             (df_all["Dias"] == -1) &
             (df_all["Status"] != "REGISTRADA") &
-            (df_all["Status"] != "ATRASADA")
+            (~df_all.get("LateTag", False).astype(bool))
         ].copy()
     
         if not auto.empty:
@@ -5252,11 +5334,11 @@ elif st.session_state.page == "index":
                 st.rerun()
     
         # ============================================================
-        # Registro manual (atras + fut)
+        # Registro manual (ALTERADO: só atrasadas tag + futuras 0..30)
         # ============================================================
         st.divider()
         st.markdown("### Registro de coleta")
-        st.caption("Futuras e atrasadas")
+        st.caption("Futuras (0–30) e atrasadas.")
     
         action_df = pd.concat([atras, fut], ignore_index=True)
         action_df = action_df.drop_duplicates(subset=["CBL", "Coleta_short", "Data", "Sheet", "Cell"]).copy()
@@ -5316,7 +5398,7 @@ elif st.session_state.page == "index":
                     st.rerun()
     
         with b2:
-            if st.button("⏰ Marcar como atrasado", use_container_width=True, key="agenda_bxl_btn_late"):
+            if st.button("⏰ Marcar como atrasada", use_container_width=True, key="agenda_bxl_btn_late"):
                 if _do_set_status("ATRASADA", "Manual: marcada como atrasada no painel"):
                     st.rerun()
     
@@ -5328,10 +5410,9 @@ elif st.session_state.page == "index":
             )
     
         # ============================================================
-        # WhatsApp (por padrão: futuras 0–30)
+        # WhatsApp (AGORA: só futuras 0–30)
         # ============================================================
         painel_whatsapp_bxl(df, phones_map, headers, phone_cols)
-
             
 
             
@@ -6501,6 +6582,7 @@ elif st.session_state.page == "clinicos":
                 st.success("Novo paciente cadastrado!")
 
     
+
 
 
 
