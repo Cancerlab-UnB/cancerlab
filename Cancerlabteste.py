@@ -2057,10 +2057,10 @@ def page_people():
                      "B.Pharm. (Pharmacy), University of Brasília (2017–2023)"], "email": "maribraccialli@gmail.com", "institution": "University of Brasília",
          "lattes": "http://lattes.cnpq.br/4480047944308175", "orcid": "https://orcid.org/0000-0002-7816-764X"},
         
-        {"name": "Wladimir Fernandes Bezerra, MD", "role": "Surgical Oncologist • Master’s Student",
+        {"name": "Wladimir Fernandes Bezerra, MD", "role": "Surgical Oncologist • MSc Student",
          "photo": "wl.jpg", "bio": "MD graduated from the University of Brasília (UnB). Completed residency training in General Surgery at the Escola Superior de Ciências da Saúde (ESCS) and in Surgical Oncology at the Hospital de Base do Distrito Federal (HBDF), where he currently works as a surgical oncologist. Has a clinical focus on gastrointestinal tract malignancies. Currently pursuing a Master’s degree in Molecular Pathology at the University of Brasília, with research focused on the perioperative dynamics of circulating cell-free DNA (cfDNA) as a liquid biopsy tool in patients undergoing surgery for gastric cancer.",
-         "degrees": ["MD, University of Brasília (UnB)"
-                     "Residency in General Surgery, Escola Superior de Ciências da Saúde (ESCS)"
+         "degrees": ["MD, University of Brasília (UnB)",
+                     "Residency in General Surgery, Escola Superior de Ciências da Saúde (ESCS)",
                      "Residency in Surgical Oncology, Hospital de Base do Distrito Federal (HBDF)"], "email": "", "institution": "University of Brasília",
          "lattes": "http://lattes.cnpq.br/9132471167946295", "orcid": ""},
         
