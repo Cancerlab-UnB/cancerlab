@@ -112,8 +112,7 @@ def main():
         for w in GENERATE_SCALES:
             to_webp(p, dst=p.with_name(f"{p.stem}-{w}.webp"), max_width=w)
 
-if __name__ == "__main__":
-    main()
+
 
 from pathlib import Path
 
