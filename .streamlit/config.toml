@@ -4,5 +4,16 @@ backgroundColor = "#FFFFFF"
 secondaryBackgroundColor = "#FFFFFF"
 textColor = "#0f172a"
 primaryColor = "#1351d8"
+
 [ui]
 hideTopBar = true
+
+[server]
+headless = true
+address = "0.0.0.0"
+port = 8501
+enableCORS = true
+enableXsrfProtection = true
+
+[browser]
+gatherUsageStats = false
