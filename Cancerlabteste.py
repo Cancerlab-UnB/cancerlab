@@ -1650,8 +1650,8 @@ def page_publications():
       "title": "Central-metal effect on anticancer activity and molecular docking of Co(II), Ni(II), and Zn(II) complexes with isatin-based ligand",
       "journal": "Journal of Molecular Structure",
       "year": 2026,
-      "url": "https://doi.org/10.1016/j.molstruc.2026.143066",
-      "doi": "10.1016/j.molstruc.2026.143066"
+      "url": "https://doi.org/10.1016/j.molstruc.2026.146386",
+      "doi": "https://doi.org/10.1016/j.molstruc.2026.146386"
       },
         
 
