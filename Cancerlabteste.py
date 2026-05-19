@@ -5678,7 +5678,7 @@ elif st.session_state.page == "index":
         # =========================================================
         st.divider()
         st.markdown("### Registro de coleta")
-        st.caption("Todas as pendentes aparecem aqui: atrasadas e futuras.")
+        st.caption("Selecione para registrar a coleta")
     
         action_df = pend.copy()
         action_df = action_df.drop_duplicates(subset=["CBL", "Coleta_short", "Data", "Sheet", "Cell"]).copy()
