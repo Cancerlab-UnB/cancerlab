@@ -3790,7 +3790,7 @@ def render_manage_bookings():
     </style>
     """, unsafe_allow_html=True)
 
-    st.markdown("## 📋 Gerenciar Agendamentos")
+    st.markdown("## Gerenciar Agendamentos")
     st.markdown("Visualize, filtre e cancele todos os agendamentos de equipamentos feitos por usuários externos.")
 
     all_bk = get_all_bookings()
