@@ -1,0 +1,330 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}CancerLab – Laboratory of Molecular Pathology of Cancer{% endblock %}</title>
+<meta name="description" content="Laboratory of Molecular Pathology of Cancer – University of Brasília">
+<link rel="icon" href="{% static 'cancerlab_icon.png' %}" type="image/png">
+<style>
+/* ===== Reset & base ===== */
+*, *::before, *::after { box-sizing: border-box; min-width: 0; }
+html { -webkit-text-size-adjust: 100%; }
+html, body { margin: 0; padding: 0; width: 100%; overflow-x: hidden; }
+body {
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background: #f8fafc;
+  color: #0f172a;
+}
+a { color: inherit; text-decoration: none; }
+img { max-width: 100%; display: block; }
+
+/* ===== Header card (white, exactly as original) ===== */
+.brand-header {
+  background: #ffffff;
+  border: 1px solid rgba(2,6,23,.06);
+  border-radius: 16px;
+  box-shadow: 0 10px 26px rgba(2,6,23,.06);
+  margin: 0 auto 12px;
+  max-width: 100%;
+}
+.brand-wrap {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 24px 22px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 34px;
+}
+.brand-left { position: relative; }
+.brand-left::before { display: none; }
+.brand-header .logo {
+  height: clamp(132px, 18vw, 180px);
+  max-height: min(32vh, 180px);
+  width: auto; display: block;
+  filter: drop-shadow(0 1px 0 rgba(0,0,0,.04));
+}
+.brand-header .logo-link { text-decoration: none; line-height: 0; }
+.brand-header .addr {
+  text-align: right;
+  color: #0f172a;
+  letter-spacing: .15px;
+}
+.brand-header .addr .lab {
+  display: block;
+  font-weight: 800;
+  font-size: clamp(24px, 3.0vw, 34px);
+  line-height: 1.12;
+}
+.brand-header .addr .lab::after {
+  content: "";
+  display: block;
+  width: 72px; height: 3px; border-radius: 2px;
+  background: rgba(19,81,216,.45);
+  margin: 12px 0 10px auto;
+}
+.brand-header .addr .muted {
+  opacity: .9;
+  font-weight: 700;
+  font-size: clamp(14px, 1.15vw, 17px);
+  line-height: 1.28;
+}
+@media (max-width: 900px) {
+  .brand-wrap { grid-template-columns: 1fr; gap: 14px; padding: 18px 14px; }
+  .brand-header .addr { text-align: center; }
+  .brand-header .logo { margin: 0 auto; }
+  .brand-header .addr .lab::after { margin-left: auto; margin-right: auto; }
+}
+
+/* ===== Topbar / Navbar (exact original) ===== */
+:root {
+  --bar-bg: #4160BA;
+  --bar-shadow: 0 6px 18px rgba(2,6,23,.08);
+  --ig-grad: linear-gradient(90deg,#F58529 0%,#FEDA77 22%,#DD2A7B 45%,#8134AF 70%,#515BD4 100%);
+}
+.topbar {
+  position: sticky; top: 0; z-index: 1000;
+  background: linear-gradient(180deg, rgba(0,0,0,.05) 0%, rgba(0,0,0,0) 100%), var(--bar-bg);
+  border-bottom: 1px solid rgba(0,0,0,.08);
+  backdrop-filter: saturate(140%) blur(8px);
+  -webkit-backdrop-filter: saturate(140%) blur(8px);
+  box-shadow: var(--bar-shadow);
+  padding-top: max(env(safe-area-inset-top), 0px);
+}
+.topbar-inner {
+  max-width: 1180px; margin: 0 auto; padding: 8px 14px;
+  display: grid; grid-template-columns: minmax(0,1fr) auto;
+  align-items: center; gap: 12px;
+}
+.menu {
+  display: flex; gap: 16px; align-items: center;
+  justify-content: flex-start;
+  min-width: 0;
+  overflow: auto hidden;
+}
+.menu::-webkit-scrollbar { display: none; }
+.menu a {
+  position: relative; text-decoration: none; color: #fff; text-transform: lowercase;
+  padding: 8px 12px; border-radius: 10px; font-weight: 700; letter-spacing: .2px;
+  transition: background .2s, color .2s, transform .15s; white-space: nowrap; line-height: 1;
+  flex: 0 0 auto;
+  font-size: clamp(12px, 1.05vw, 15px);
+}
+.menu a:hover { background: rgba(255,255,255,.14); transform: translateY(-1px); }
+.menu a.active, .menu a[aria-current="page"] { background: rgba(255,255,255,.22); }
+.menu a.active::after, .menu a[aria-current="page"]::after {
+  content: ""; position: absolute; left: 12px; right: 12px; bottom: 6px; height: 2px;
+  background: rgba(255,255,255,.9); border-radius: 2px;
+}
+@media (max-width: 1120px) { .menu { flex-wrap: wrap; row-gap: 8px; } }
+.icons {
+  display: flex; gap: 6px; align-items: center; justify-content: flex-end;
+  min-width: 0; flex-wrap: nowrap;
+}
+.icon-btn, .icon-img {
+  display: inline-flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.45);
+  color: #fff; border-radius: 10px; padding: 5px 8px;
+  line-height: 1; white-space: nowrap; height: 32px;
+  transition: background .2s, transform .15s, border-color .2s;
+  text-decoration: none;
+}
+.icon-btn:hover, .icon-img:hover { background: rgba(255,255,255,.16); transform: translateY(-1px); }
+.icon-img img { height: 18px; width: auto; display: block; filter: drop-shadow(0 1px 0 rgba(0,0,0,.05)); }
+.icon-btn.ig { gap: 6px; font-weight: 800; }
+.icon-btn.ig .glyph { width: 18px; height: 18px; flex: 0 0 18px; color: #fff; }
+.icon-btn.ig .label {
+  background: var(--ig-grad);
+  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+}
+@media (max-width: 760px) {
+  .topbar-inner { grid-template-columns: 1fr; gap: 8px; }
+  .icons { justify-content: flex-start; }
+  .icon-btn .label { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .menu a, .icon-btn, .icon-img { transition: none; }
+}
+
+/* ===== Django messages ===== */
+.dj-messages { list-style: none; margin: 8px 16px; padding: 0; }
+.dj-messages li {
+  padding: 10px 14px; border-radius: 10px; margin-bottom: 6px; font-weight: 600; font-size: .94rem;
+}
+.dj-messages .success { background: #dcfce7; color: #166534; }
+.dj-messages .error   { background: #fee2e2; color: #991b1b; }
+.dj-messages .warning { background: #fef9c3; color: #854d0e; }
+.dj-messages .info    { background: #dbeafe; color: #1e40af; }
+
+/* ===== Help widget (exact original) ===== */
+.help-root { position: fixed; right: 14px; bottom: 14px; z-index: 1100;
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; }
+.help-toggle { display: none; }
+.help-fab {
+  position: fixed; right: 14px; bottom: 14px;
+  width: 46px; height: 46px; border-radius: 999px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  background: radial-gradient(120% 120% at 50% 0%, rgba(255,255,255,.16), rgba(255,255,255,0)),
+    var(--bar-bg);
+  color: #fff; border: 1px solid rgba(255,255,255,.45);
+  box-shadow: 0 12px 26px rgba(2,6,23,.18);
+  cursor: pointer; user-select: none; text-decoration: none;
+  transition: transform .15s ease, box-shadow .15s ease;
+  backdrop-filter: saturate(140%) blur(2px);
+  -webkit-backdrop-filter: saturate(140%) blur(2px);
+}
+.help-fab:hover { transform: translateY(-1px); box-shadow: 0 16px 34px rgba(2,6,23,.22); }
+.help-fab svg { width: 20px; height: 20px; }
+.help-backdrop {
+  position: fixed; inset: 0; background: rgba(2,6,23,.08);
+  opacity: 0; pointer-events: none; transition: opacity .15s ease;
+}
+.help-card {
+  position: fixed; right: 14px; bottom: 66px; width: min(92vw, 320px);
+  background: rgba(255,255,255,.65); color: #0f172a;
+  border-radius: 16px; border: 1px solid rgba(255,255,255,.55);
+  box-shadow: 0 22px 44px rgba(2,6,23,.22);
+  transform: translateY(8px) scale(.99);
+  opacity: 0; pointer-events: none;
+  transition: transform .18s ease, opacity .18s ease;
+  backdrop-filter: blur(12px) saturate(120%);
+  -webkit-backdrop-filter: blur(12px) saturate(120%);
+  overflow: hidden;
+}
+.help-header {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 10px 12px;
+  background: linear-gradient(180deg, rgba(255,255,255,.45), rgba(255,255,255,.15)), var(--bar-bg);
+  color: #fff; border-bottom: 1px solid rgba(255,255,255,.45);
+}
+.help-title { margin: 0; font-weight: 900; font-size: .98rem; letter-spacing: .2px; }
+.help-close {
+  width: 28px; height: 28px; border-radius: 10px; border: 1px solid rgba(255,255,255,.6);
+  background: rgba(255,255,255,.15); color: #fff;
+  display: inline-flex; align-items: center; justify-content: center; cursor: pointer; text-decoration: none;
+}
+.help-body { padding: 12px; }
+.help-meta { font-size: .92rem; color: #5a6881; margin: 6px 0 10px; }
+.help-strong { font-weight: 900; color: #0f172a; }
+.help-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.hbtn, .hbtn-ghost {
+  display: inline-flex; align-items: center; gap: 8px; text-decoration: none; font-weight: 800;
+  padding: 10px 12px; border-radius: 12px; font-size: .9rem;
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+.hbtn { background: var(--bar-bg); color: #fff; border: 1px solid rgba(255,255,255,.55);
+  box-shadow: 0 10px 24px rgba(2,6,23,.18); }
+.hbtn:hover { transform: translateY(-1px); box-shadow: 0 14px 28px rgba(2,6,23,.22); }
+.hbtn-ghost { background: rgba(255,255,255,.75); color: #0f172a; border: 1px solid #e9edf6; }
+.hbtn-ghost:hover { transform: translateY(-1px); border-color: #cbd5e1; }
+#help-pop:checked ~ .help-backdrop { opacity: 1; pointer-events: auto; }
+#help-pop:checked ~ .help-card { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
+.help-card a:focus { outline: none; box-shadow: 0 0 0 3px rgba(59,130,246,.35); border-radius: 12px; }
+@media (prefers-reduced-motion: reduce) { .help-fab, .help-card { transition: none; } }
+
+{% block extra_css %}{% endblock %}
+</style>
+{% block extra_head %}{% endblock %}
+</head>
+<body>
+
+<!-- BRAND HEADER -->
+<header class="brand-header" role="banner" aria-label="Laboratory heading">
+  <div class="brand-wrap">
+    <div class="brand-left">
+      <a href="{% url 'public:home' %}" class="logo-link" aria-label="Home">
+        <img class="logo" src="{% static 'imgfront.png' %}" alt="Lab logo" loading="eager" decoding="async"
+             onerror="this.style.display='none'">
+      </a>
+    </div>
+    <div class="addr">
+      <span class="lab">Laboratory of Molecular Pathology of Cancer</span>
+      <span class="muted">Faculty of Health Sciences<br>University of Brasília<br>Brasília – DF – Brazil</span>
+    </div>
+  </div>
+</header>
+
+<!-- TOPBAR / NAVBAR -->
+<div class="topbar" role="navigation" aria-label="Primary">
+  <div class="topbar-inner">
+    <nav class="menu">
+      {% for item in nav_items %}
+        <a target="_self" {% if item.active %}class="active" aria-current="page"{% endif %}
+           href="{% url item.url_name %}">{{ item.label }}</a>
+      {% endfor %}
+    </nav>
+    <div class="icons">
+      <a class="icon-img" href="https://www.unb.br/" target="_self" rel="noopener" title="Universidade de Brasília">
+        <img src="{% static 'unb.svg' %}" alt="UnB"
+             onerror="this.src='{% static 'unb.png' %}'; this.onerror=null;">
+      </a>
+      <a class="icon-btn ig" href="https://www.instagram.com/cancerlab_unb/" target="_blank" rel="noopener" title="@cancerlab_unb">
+        <svg class="glyph" viewBox="0 0 24 24" aria-hidden="true">
+          <path fill="currentColor" d="M7 2h10a5 5 0 015 5v10a5 5 0 01-5 5H7a5 5 0 01-5-5V7a5 5 0 015-5zm0 2a3 3 0 00-3 3v10a3 3 0 003 3h10a3 3 0 003-3V7a3 3 0 00-3-3H7zm5 3a5 5 0 110 10 5 5 0 010-10zm0 2a3 3 0 100 6 3 3 0 000-6zm6.5-2a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"/>
+        </svg>
+        <span class="label">Instagram</span>
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Django messages -->
+{% if messages %}
+<ul class="dj-messages">
+  {% for msg in messages %}<li class="{{ msg.tags }}">{{ msg }}</li>{% endfor %}
+</ul>
+{% endif %}
+
+<!-- PAGE CONTENT -->
+{% block content %}{% endblock %}
+
+<!-- HELP WIDGET (exact original) -->
+<div class="help-root" aria-live="polite">
+  <input id="help-pop" class="help-toggle" type="checkbox">
+  <label class="help-fab" for="help-pop" title="Get help">
+    <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="9"></circle>
+      <circle cx="12" cy="12" r="3.5"></circle>
+      <path d="M4.9 4.9l3.2 3.2M19.1 4.9l-3.2 3.2M4.9 19.1l3.2-3.2M19.1 19.1l-3.2-3.2"></path>
+    </svg>
+  </label>
+  <label class="help-backdrop" for="help-pop" aria-hidden="true"></label>
+  <aside class="help-card" role="dialog" aria-modal="true" aria-labelledby="help-title">
+    <div class="help-header">
+      <h4 id="help-title" class="help-title">Problems with the Website?</h4>
+      <label for="help-pop" class="help-close" title="Close">✕</label>
+    </div>
+    <div class="help-body">
+      <div class="help-meta">
+        <span class="help-strong">Victor Fleck</span> — Undergraduate Pharmacy Student · Web Developer
+      </div>
+      <div class="help-row" style="margin-bottom:10px;">
+        <a class="hbtn" href="mailto:Victor.fleck906438@gmail.com?subject=Website%20issue%20%E2%80%93%20support%20request&body=Hi%2C%0A%0AI%20found%20a%20problem%20on%20the%20site.%0A-%20What%20I%20was%20doing%3A%0A-%20What%20happened%3A%0A-%20Expected%20behavior%3A%0A%0AThanks!" target="_blank" rel="noopener" aria-label="Email">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="3" y="5" width="18" height="14" rx="2" ry="2"></rect><path d="M3 7l9 6 9-6"></path>
+          </svg>
+          Email
+        </a>
+        <a class="hbtn-ghost" href="tel:+5561991281207" aria-label="Call">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 1.09 4.18 2 2 0 0 1 3.1 2h3a2 2 0 0 1 2 1.72c.12.9.34 1.78.66 2.61a2 2 0 0 1-.45 2.11L7.09 9.91a16 16 0 0 0 6 6l1.47-1.22a2 2 0 0 1 2.11-.45c.83.32 1.71.54 2.61.66A2 2 0 0 1 22 16.92z"/>
+          </svg>
+          Call
+        </a>
+        <a class="hbtn-ghost" href="https://wa.me/5561991281207" target="_blank" rel="noopener" aria-label="WhatsApp">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M20.52 3.48A11.5 11.5 0 0 0 2.6 18.39L2 22l3.72-.58A11.5 11.5 0 1 0 20.52 3.48Z"/><path d="M7 10.5s1 3 5 5 3-2 3-2"/>
+          </svg>
+          WhatsApp
+        </a>
+      </div>
+      <a class="hbtn-ghost" href="mailto:Victor.fleck906438@gmail.com?subject=Website%20issue%20%E2%80%93%20support%20request" target="_blank" rel="noopener">Report a problem</a>
+    </div>
+  </aside>
+</div>
+
+{% block extra_js %}{% endblock %}
+</body>
+</html>

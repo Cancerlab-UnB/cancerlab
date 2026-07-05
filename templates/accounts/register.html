@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Create Account – CancerLab{% endblock %}
+{% block extra_css %}
+.auth-outer { max-width: 500px; margin: 40px auto; padding: 0 16px; }
+.auth-card { background: #fff; border: 1px solid rgba(2,6,23,.08); border-radius: 20px; padding: 32px 28px; box-shadow: 0 16px 40px rgba(2,6,23,.10); }
+.auth-title { font-weight: 900; font-size: 1.4rem; color: #0f172a; margin-bottom: 20px; }
+.form-group { margin-bottom: 14px; }
+.form-group label { display: block; font-weight: 700; margin-bottom: 4px; color: #1F2A37; font-size: .9rem; }
+.form-control { width: 100%; padding: .55rem .75rem; border: 1px solid #C5D1DE; border-radius: .6rem; background: #EDF2F7; color: #111827; font-size: 15px; }
+.form-control:focus { outline: none; border-color: #173975; }
+.radio-group { display: flex; gap: 14px; margin-top: 4px; }
+.radio-opt { display: flex; align-items: center; gap: 6px; font-size: .95rem; }
+.btn-submit { width: 100%; padding: 11px; background: #173975; color: #fff; border: none; border-radius: 1rem; font-size: 1.05rem; font-weight: 800; cursor: pointer; transition: .2s; }
+.btn-submit:hover { background: #0A74B7; }
+.form-error { color: #dc2626; font-size: .85rem; margin-top: 3px; }
+.back-link { margin-top: 14px; text-align: center; font-size: .9rem; }
+.back-link a { color: #173975; font-weight: 700; text-decoration: none; }
+{% endblock %}
+{% block content %}
+<div class="auth-outer">
+  <div class="auth-card">
+    <div class="auth-title">Create a new account</div>
+    <form method="post" action="{% url 'accounts:register' %}">
+      {% csrf_token %}
+      <div class="form-group">
+        <label>Full name</label>
+        <input type="text" name="nome" class="form-control" value="{{ form.nome.value|default:'' }}" placeholder="Full name">
+        {% for e in form.nome.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+      </div>
+      <div class="form-group">
+        <label>CPF</label>
+        <input type="text" name="cpf" class="form-control" value="{{ form.cpf.value|default:'' }}" placeholder="Digits only (11)">
+        {% for e in form.cpf.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+      </div>
+      <div class="form-group">
+        <label>E-mail</label>
+        <input type="email" name="email" class="form-control" value="{{ form.email.value|default:'' }}" placeholder="you@email.com">
+        {% for e in form.email.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" name="password" class="form-control" placeholder="At least 8 characters">
+        {% for e in form.password.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+      </div>
+      <div class="form-group">
+        <label>User type</label>
+        <div class="radio-group">
+          {% for choice in form.perfil %}
+          <label class="radio-opt">{{ choice.tag }} <span>{{ choice.choice_label }}</span></label>
+          {% endfor %}
+        </div>
+      </div>
+      {% if form.non_field_errors %}<div class="form-error" style="margin-bottom:10px">{{ form.non_field_errors }}</div>{% endif %}
+      <button type="submit" class="btn-submit">Register</button>
+    </form>
+    <div class="back-link">Already have an account? <a href="{% url 'accounts:login' %}">Sign in</a></div>
+  </div>
+</div>
+{% endblock %}

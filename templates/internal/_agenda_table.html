@@ -1,0 +1,14 @@
+<div class="tab-panel {% if active %}active{% endif %}" data-panel="{{ pkey }}">
+  {% if rows %}
+  <div class="table-scroll">
+    <table class="dt">
+      <thead><tr><th>CBL</th><th>Grupo</th><th>Segmento</th><th>Coleta</th><th>Data</th><th>Dias</th><th>Status</th><th>Célula</th></tr></thead>
+      <tbody>
+        {% for r in rows %}<tr>{% for v in r %}<td>{{ v }}</td>{% endfor %}</tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p style="color:#64748b;padding:12px 0">Nenhuma coleta neste recorte.</p>
+  {% endif %}
+</div>

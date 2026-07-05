@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Equipments – CancerLab{% endblock %}
+{% block extra_css %}
+.wrap { max-width: 1180px; margin: 28px auto 44px; padding: 0 16px; }
+.page-title { font-weight: 900; font-size: clamp(26px,3.5vw,36px); color: #0f172a; margin: 6px 0 10px; }
+.page-sub { color: #475569; margin-bottom: 24px; }
+.eq-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px,1fr)); gap: 18px; margin-top: 14px; }
+.eq-card { background: #fff; border: 1px solid #e6e8ee; border-radius: 18px; padding: 20px 18px; box-shadow: 0 8px 20px rgba(2,6,23,.06); display: flex; flex-direction: column; gap: 10px; transition: transform .15s, box-shadow .15s; }
+.eq-card:hover { transform: translateY(-3px); box-shadow: 0 14px 30px rgba(2,6,23,.09); }
+.eq-name { font-weight: 800; font-size: 1.05rem; color: #0f172a; }
+.eq-category { font-size: .8rem; font-weight: 700; color: #1351d8; background: rgba(19,81,216,.08); padding: 2px 8px; border-radius: 999px; display: inline-block; }
+.eq-desc { color: #475569; font-size: .92rem; line-height: 1.6; flex: 1; }
+.btn { display: inline-block; padding: 8px 14px; border-radius: 10px; text-decoration: none; font-weight: 800; background: #1351d8; color: #fff !important; align-self: flex-start; }
+.btn:hover { background: #0d44b5; }
+.section-divider { font-weight: 900; font-size: clamp(18px,2.4vw,24px); color: #0f172a; margin: 32px 0 14px; display: flex; align-items: center; gap: 10px; }
+.section-divider::after { content: ""; flex: 1; height: 3px; border-radius: 2px; background: rgba(63,94,181,.3); }
+.schedule-banner {
+  background: linear-gradient(135deg, #4160BA, #2d4a9e); color: #fff; border-radius: 20px;
+  padding: 28px 24px; margin-bottom: 32px;
+}
+.schedule-banner h2 { font-size: clamp(20px,3vw,28px); font-weight: 900; margin: 0 0 8px; }
+.schedule-banner p { opacity: .9; line-height: 1.6; margin: 0 0 16px; }
+.schedule-banner a { display: inline-block; padding: 10px 16px; border-radius: 10px; background: #fff; color: #1351d8 !important; font-weight: 800; text-decoration: none; }
+.schedule-banner a:hover { background: #f0f4ff; }
+{% endblock %}
+{% block content %}
+<div class="wrap">
+  <div class="schedule-banner">
+    <h2>Lab Equipment Scheduling</h2>
+    <p>Need access to CancerLab equipment? External users can register and request bookings online. All requests are reviewed by the lab team before confirmation.</p>
+    <a href="{% url 'bookings:schedule' %}">📅 Schedule Equipment</a>
+  </div>
+
+  <div class="page-title">Equipments</div>
+  <p class="page-sub">Instruments available at CancerLab. Click a card to open its record on the PNIPE / MCTI platform.</p>
+
+  <div class="eq-grid">
+    {% for eq in equipment_list %}
+    <a class="eq-card" href="{{ eq.url }}" target="_blank" rel="noopener noreferrer" aria-label="{{ eq.name }}">
+      <div class="eq-name">{{ eq.name }}</div>
+      <p class="eq-desc">{{ eq.function }}</p>
+    </a>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

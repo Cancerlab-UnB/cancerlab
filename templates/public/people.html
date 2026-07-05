@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}People – CancerLab{% endblock %}
+{% block extra_css %}
+.people-wrap { max-width: 1180px; margin: 0 auto; padding: 0 16px 40px; }
+.people-wrap h2 { font-size: clamp(26px, 3.5vw, 36px); font-weight: 900; color: #0f172a; margin: 24px 0 18px; }
+.person-row {
+  display: grid; grid-template-columns: 120px 1fr; gap: 18px; align-items: start;
+  padding: 14px 0; border-bottom: 1px solid #f1f5f9;
+}
+.person-row:last-child { border-bottom: none; }
+.person-photo {
+  width: 120px; height: 120px; object-fit: cover; border-radius: 10px;
+  border: 1px solid #d1d5db; background: #fff;
+}
+.ph-placeholder {
+  width: 120px; height: 120px; border-radius: 10px; border: 1px dashed #cbd5e1;
+  display: flex; align-items: center; justify-content: center; color: #9ca3af;
+  background: #f8fafc; font-size: 2rem;
+}
+.person-name { font-weight: 700; font-size: 1.05rem; line-height: 1.2; color: #0f172a; }
+.person-role { color: #374151; font-size: 0.92rem; margin-top: 2px; }
+.person-bio { color: #374151; font-size: 0.93rem; line-height: 1.6; margin-top: 6px; }
+.person-details { margin-top: 8px; }
+.person-details summary { cursor: pointer; font-size: 0.9rem; font-weight: 600; color: #1351d8; list-style: none; }
+.person-details summary::-webkit-details-marker { display: none; }
+.person-details summary::before { content: "+ "; }
+details[open] .person-details summary::before { content: "- "; }
+.person-degrees { font-size: 0.88rem; color: #475569; margin: 8px 0 0 12px; }
+.person-degrees li { margin: 3px 0; }
+.person-links { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+.person-links a {
+  font-size: .82rem; padding: 3px 9px; border-radius: 999px; border: 1px solid #e6e8ee;
+  color: #334155; text-decoration: none;
+}
+.person-links a:hover { border-color: #94a3b8; color: #1351d8; }
+@media (max-width: 640px) {
+  .person-row { grid-template-columns: 90px 1fr; gap: 12px; }
+  .person-photo, .ph-placeholder { width: 90px; height: 90px; }
+}
+/* Alumini section */
+.alumini-title { color: #040359 !important; font-weight: 800; margin: 20px 0 16px; }
+.alumini-grid { display: grid; grid-template-columns: repeat(3, minmax(220px,1fr)); gap: 8px 22px; align-items: start; }
+@media (max-width: 1000px) { .alumini-grid { grid-template-columns: repeat(2, minmax(220px,1fr)); } }
+@media (max-width: 640px) { .alumini-grid { grid-template-columns: 1fr; } }
+.alumini-card { padding: 4px 0; }
+.alumini-card a { font-weight: 700; text-decoration: none; color: #040359; }
+.alumini-card a:hover { text-decoration: underline; }
+.alumini-meta { font-size: 13px; color: #040359; opacity: .9; margin-top: 2px; }
+{% endblock %}
+{% block content %}
+<div class="people-wrap">
+  <h2>People</h2>
+  {% for p in people %}
+  <div class="person-row">
+    <div>
+      {% if p.photo %}
+        <img class="person-photo" src="{% static 'people/' %}{{ p.photo }}" alt="{{ p.name }}"
+             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+        <div class="ph-placeholder" style="display:none">?</div>
+      {% else %}
+        <div class="ph-placeholder">?</div>
+      {% endif %}
+    </div>
+    <div>
+      <div class="person-name">{{ p.name }}</div>
+      <div class="person-role">{{ p.role }}</div>
+      <details class="person-details">
+        <summary>See more</summary>
+        {% if p.bio %}<p class="person-bio">{{ p.bio }}</p>{% endif %}
+        {% if p.degrees %}
+        <ul class="person-degrees">
+          {% for d in p.degrees %}<li>{{ d }}</li>{% endfor %}
+        </ul>
+        {% endif %}
+        <div class="person-links">
+          {% if p.lattes %}<a href="{{ p.lattes }}" target="_blank" rel="noopener">Lattes</a>{% endif %}
+          {% if p.orcid %}<a href="{{ p.orcid }}" target="_blank" rel="noopener">ORCID</a>{% endif %}
+          {% if p.email %}<a href="mailto:{{ p.email }}">E-mail</a>{% endif %}
+        </div>
+      </details>
+    </div>
+  </div>
+  {% endfor %}
+
+  <!-- Alumini section -->
+  {% for label, items in alumini_groups.items %}
+  {% if items %}
+  <h4 style="margin:14px 0 8px;color:#040359;font-weight:700;">{{ label }}</h4>
+  <div class="alumini-grid">
+    {% for a in items %}
+    <div class="alumini-card">
+      {% if a.lattes %}
+        <a href="{{ a.lattes }}" target="_blank" rel="noopener">{{ a.name }}</a>
+      {% else %}
+        {{ a.name }}
+      {% endif %}
+      {% if a.year %}<div class="alumini-meta">{{ a.year }}</div>{% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+  {% endfor %}
+</div>
+{% endblock %}

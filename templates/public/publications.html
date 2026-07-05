@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block title %}Publications – CancerLab{% endblock %}
+{% block extra_css %}
+.pub-wrap { max-width: 1180px; margin: 28px auto 40px; padding: 0 16px; }
+.pub-h1 { font-weight: 900; font-size: clamp(26px,3.6vw,38px); margin: 6px 0 0; color: #0f172a; }
+.pub-sub { color: #475569; font-size: .98rem; margin: 4px 0 18px; }
+.year-index { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 18px; }
+.year-chip { display: inline-block; padding: 6px 10px; border: 1px solid #e6e8ee; border-radius: 999px; text-decoration: none; font-weight: 700; font-size: .92rem; color: #0f172a; background: #fff; }
+.year-chip:hover { border-color: #cdd3e0; }
+.year-section { margin: 26px 0 24px; scroll-margin-top: 90px; }
+.year-title { font-weight: 900; font-size: clamp(18px,2.6vw,24px); color: #0f172a; margin: 0 0 10px; display: flex; align-items: center; gap: 10px; }
+.year-count { font-weight: 700; color: #475569; font-size: .88rem; background: #f1f5f9; border: 1px solid #e2e8f0; padding: 2px 8px; border-radius: 999px; }
+.subhead { display: flex; align-items: center; gap: 10px; margin: 10px 0 8px; font-weight: 900; color: #0f172a; font-size: clamp(14px,1.8vw,18px); }
+.subhead .bar { height: 3px; border-radius: 2px; background: rgba(63,94,181,.35); flex: 1; }
+.item-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+.item {
+  background: #fff; border: 1px solid #e6e8ee; border-radius: 14px;
+  padding: 12px 14px; display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: start;
+  position: relative; overflow: hidden;
+  transition: box-shadow .15s ease, border-color .15s ease, transform .15s ease;
+}
+.item:hover { box-shadow: 0 8px 18px rgba(2,6,23,.08); border-color: #d9dde3; transform: translateY(-2px); }
+.item .lead { font-weight: 800; color: #1351d8; text-decoration: none; }
+.item .lead:hover { text-decoration: underline; }
+.item .meta { color: #475569; font-size: .92rem; margin-top: 4px; }
+.aside { display: flex; gap: 8px; align-items: center; }
+.doi-badge, .link-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: .78rem; padding: 3px 9px; border-radius: 999px;
+  border: 1px solid #cbd5e1; color: #334155; background: #f8fafc; text-decoration: none;
+}
+.doi-badge:hover, .link-badge:hover { border-color: #aab7c7; }
+.ext {
+  display: inline-block; width: 12px; height: 12px;
+  background: conic-gradient(from 90deg, #64748b, #94a3b8);
+  -webkit-mask: url('data:image/svg+xml;utf8,<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="black" d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42 9.3-9.29H14V3z"/><path fill="black" d="M5 5h5V3H3v7h2V5zm0 14v-5H3v7h7v-2H5z"/></svg>') center/contain no-repeat;
+  mask: url('data:image/svg+xml;utf8,<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="black" d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42 9.3-9.29H14V3z"/><path fill="black" d="M5 5h5V3H3v7h2V5zm0 14v-5H3v7h7v-2H5z"/></svg>') center/contain no-repeat;
+}
+.item.patent::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: linear-gradient(#fde68a,#fca5a5); }
+.patent .meta { color: #475569; }
+.back-top { display: inline-block; margin: 10px 0 0; font-size: .88rem; color: #0f172a; text-decoration: none; }
+.back-top:hover { text-decoration: underline; }
+{% endblock %}
+{% block content %}
+<div class="pub-wrap" id="top">
+  <div class="pub-h1">Publications</div>
+  <div class="pub-sub">Peer-reviewed articles and patents, grouped by year.</div>
+
+  <nav class="year-index">
+    {% for section in sections %}
+      <a class="year-chip" href="#year-{{ section.year }}">{{ section.year }}</a>
+    {% endfor %}
+  </nav>
+
+  {% for section in sections %}
+  <section class="year-section" id="year-{{ section.year }}">
+    <div class="year-title">{{ section.year }} <span class="year-count">{{ section.count }}</span></div>
+
+    {% if section.publications %}
+    <div class="subhead">Publications <span class="bar"></span></div>
+    <ul class="item-list">
+      {% for pub in section.publications %}
+      <li class="item">
+        <div>
+          {% if pub.url or pub.doi %}
+            <a class="lead" href="{% if pub.doi %}https://doi.org/{{ pub.doi }}{% else %}{{ pub.url }}{% endif %}" target="_blank" rel="noopener">{{ pub.title }}</a>
+          {% else %}
+            <span class="lead">{{ pub.title }}</span>
+          {% endif %}
+          <div class="meta">{{ pub.authors }}</div>
+          {% if pub.journal %}<div class="meta" style="font-style:italic">{{ pub.journal }}</div>{% endif %}
+        </div>
+        <div class="aside">
+          {% if pub.doi %}
+            <a class="doi-badge" href="https://doi.org/{{ pub.doi }}" target="_blank" rel="noopener">DOI <span class="ext"></span></a>
+          {% elif pub.url %}
+            <a class="link-badge" href="{{ pub.url }}" target="_blank" rel="noopener">Link <span class="ext"></span></a>
+          {% endif %}
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+
+    {% if section.patents %}
+    <div class="subhead" style="margin-top:16px">Patents <span class="bar"></span></div>
+    <ul class="item-list">
+      {% for pat in section.patents %}
+      <li class="item patent">
+        <div>
+          <span class="lead">{{ pat.title }}</span>
+          <div class="meta">{{ pat.inventors }}</div>
+          <div class="meta">{{ pat.jurisdiction }} · {{ pat.number }}</div>
+          {% if pat.deposited %}<div class="meta">Deposited: {{ pat.deposited }}</div>{% endif %}
+        </div>
+        <div class="aside">
+          {% if pat.url %}
+            <a class="doi-badge" href="{{ pat.url }}" target="_blank" rel="noopener">Patent <span class="ext"></span></a>
+          {% endif %}
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+
+    <a class="back-top" href="#top">^ Back to top</a>
+  </section>
+  {% endfor %}
+</div>
+{% endblock %}

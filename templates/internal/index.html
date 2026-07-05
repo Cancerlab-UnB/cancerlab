@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Painel Interno – CancerLab{% endblock %}
+{% block extra_css %}
+:root { --bg:#F3F9FB; --text:#111827; --muted:#1F2A37; --primary:#173975; --primary-hover:#0A74B7; --input-bg:#EDF2F7; --input-text:#111827; --border:#C5D1DE; }
+body { background: var(--bg); }
+.int-wrap { max-width: 1100px; margin: 28px auto; padding: 0 16px; }
+.int-welcome { font-weight: 900; font-size: clamp(20px,3vw,28px); color: var(--text); margin-bottom: 4px; }
+.int-sub { color: var(--muted); margin-bottom: 24px; font-size: .95rem; }
+.int-sub a { color: var(--primary); font-weight: 700; text-decoration: none; }
+.int-sub a:hover { text-decoration: underline; }
+.int-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(260px,1fr)); gap: 18px; }
+.int-card { background: #fff; border: 1px solid rgba(2,6,23,.08); border-radius: 16px; padding: 22px 20px; box-shadow: 0 8px 20px rgba(2,6,23,.06); }
+.int-card-title { font-weight: 800; font-size: 1.05rem; margin-bottom: 6px; color: var(--text); }
+.int-card-desc { color: var(--muted); font-size: .9rem; line-height: 1.55; margin-bottom: 14px; }
+.stButton { display: inline-block; padding: .75rem 2rem; background: var(--primary); color: white; border-radius: 1rem; border: none; font-size: 1.05rem; font-weight: 700; text-decoration: none; cursor: pointer; transition: .2s; }
+.stButton:hover { background: var(--primary-hover); }
+.pending-notice { background: #fffbeb; border: 1px solid #fcd34d; border-radius: 12px; padding: 14px 16px; margin-bottom: 20px; font-size: .94rem; color: #78350f; }
+.pending-notice a { color: var(--primary); font-weight: 700; text-decoration: none; margin-left: 6px; }
+{% endblock %}
+{% block content %}
+<div class="int-wrap">
+  <div class="int-welcome">Bem-vindo, {{ user.nome }}</div>
+  <div class="int-sub">{{ user.perfil|capfirst }} · {{ user.email }}
+    · <a href="{% url 'accounts:logout' %}">Sair</a>
+  </div>
+
+  {% if pending_count > 0 %}
+  <div class="pending-notice">
+    <strong>{{ pending_count }}</strong> solicitação(ões) de agendamento aguardando aprovação.
+    <a href="{% url 'internal:manage_bookings' %}">Revisar</a>
+  </div>
+  {% endif %}
+
+  <div class="int-grid">
+    <div class="int-card">
+      <div class="int-card-title">Biópsia Líquida</div>
+      <p class="int-card-desc">Entrada e acompanhamento de pacientes CCR — edição direta na planilha Excel.</p>
+      <a class="stButton" href="{% url 'internal:biopsia' %}">Abrir</a>
+    </div>
+    <div class="int-card">
+      <div class="int-card-title">Dados Clínicos</div>
+      <p class="int-card-desc">Cadastro e edição de dados clínicos dos pacientes CCR biópsia líquida.</p>
+      <a class="stButton" href="{% url 'internal:clinicos' %}">Abrir</a>
+    </div>
+    <div class="int-card">
+      <div class="int-card-title">Painel de Dados</div>
+      <p class="int-card-desc">Visualizações e gráficos dos dados clínicos CCR e da agenda de coletas de biópsia líquida.</p>
+      <a class="stButton" href="{% url 'internal:dashboard' %}">Abrir painel</a>
+    </div>
+    <div class="int-card">
+      <div class="int-card-title">Gerenciar Agendamentos</div>
+      <p class="int-card-desc">Visualize, aprove, rejeite e cancele solicitações de uso de equipamentos.{% if pending_count > 0 %} ({{ pending_count }} pendente{{ pending_count|pluralize }}){% endif %}</p>
+      <a class="stButton" href="{% url 'internal:manage_bookings' %}">Gerenciar</a>
+    </div>
+    <div class="int-card">
+      <div class="int-card-title">Admin Django</div>
+      <p class="int-card-desc">Painel administrativo para gerenciar usuários, dados e configurações avançadas.</p>
+      <a class="stButton" href="/admin/" target="_blank">Abrir admin</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

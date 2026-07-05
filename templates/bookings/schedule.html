@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+{% block title %}Equipment Scheduling – CancerLab{% endblock %}
+{% block extra_css %}
+:root {
+  --sch-blue:#2a4db5; --sch-blue-light:#e8eefa;
+  --sch-green:#0d7c4c; --sch-green-light:#e6f5ee;
+  --sch-red:#b91c1c;  --sch-red-light:#fee2e2;
+  --sch-yellow:#854d0e; --sch-yellow-light:#fef9c3;
+  --sch-ink:#0f172a; --sch-muted:#475569; --sch-line:#e2e8f0; --sch-card:#ffffff;
+}
+.sch-page { max-width: 760px; margin: 0 auto; padding: 28px 20px 60px; }
+.sch-hero { text-align: center; margin-bottom: 28px; }
+.sch-hero h1 { font-size: clamp(22px,3vw,30px); font-weight: 900; color: var(--sch-ink); margin: 6px 0 4px; }
+.sch-hero p  { color: var(--sch-muted); font-size: .94rem; margin: 0; }
+.sch-card { background: var(--sch-card); border: 1px solid var(--sch-line); border-radius: 16px; padding: 24px 22px 20px; box-shadow: 0 8px 22px rgba(2,6,23,.07); margin-bottom: 20px; }
+.sch-card-title { font-weight: 800; font-size: 17px; color: var(--sch-ink); margin: 0 0 16px; line-height: 1.3; }
+.sch-tabs { display: flex; gap: 8px; margin-bottom: 20px; }
+.sch-tab { padding: 8px 16px; border-radius: 10px; font-weight: 700; font-size: .9rem; border: 1px solid var(--sch-line); color: var(--sch-ink); background: #fff; cursor: pointer; text-decoration: none; transition: background .15s; }
+.sch-tab.active, .sch-tab:hover { background: var(--sch-blue); color: #fff; border-color: var(--sch-blue); }
+.form-group { margin-bottom: 14px; }
+.form-group label { display: block; font-weight: 700; font-size: .9rem; margin-bottom: 4px; color: var(--sch-muted); }
+.form-control { width: 100%; padding: 9px 12px; border: 1px solid var(--sch-line); border-radius: 10px; font-size: 15px; background: #fff; color: var(--sch-ink); }
+.form-control:focus { outline: none; border-color: var(--sch-blue); box-shadow: 0 0 0 3px rgba(42,77,181,.12); }
+.btn-primary { display: block; width: 100%; padding: 11px; background: var(--sch-blue); color: #fff; border: none; border-radius: 10px; font-size: 1rem; font-weight: 800; cursor: pointer; transition: .15s; margin-top: 4px; text-align: center; text-decoration: none; }
+.btn-primary:hover { background: #1d3a9a; }
+.btn-ghost { display: inline-block; padding: 7px 12px; border: 1px solid var(--sch-line); border-radius: 8px; color: var(--sch-ink); font-weight: 700; font-size: .88rem; background: #fff; cursor: pointer; text-decoration: none; transition: .15s; }
+.btn-ghost:hover { border-color: #94a3b8; }
+.booking-row { border: 1px solid var(--sch-line); border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; background: #fff; word-break: break-word; }
+.booking-row:last-child { margin-bottom: 0; }
+.booking-equip { font-weight: 800; font-size: 15px; color: var(--sch-ink); margin-bottom: 4px; }
+.booking-meta { color: var(--sch-muted); font-size: 13px; margin-top: 4px; line-height: 1.5; }
+.status-pending  { display:inline-block;padding:2px 10px;border-radius:999px;background:var(--sch-yellow-light);color:var(--sch-yellow);font-size:12px;font-weight:800; }
+.status-approved { display:inline-block;padding:2px 10px;border-radius:999px;background:var(--sch-green-light);color:var(--sch-green);font-size:12px;font-weight:800; }
+.status-rejected { display:inline-block;padding:2px 10px;border-radius:999px;background:var(--sch-red-light);color:var(--sch-red);font-size:12px;font-weight:800; }
+.status-cancelled{ display:inline-block;padding:2px 10px;border-radius:999px;background:#f1f5f9;color:#64748b;font-size:12px;font-weight:800; }
+.cal-row { border: 1px solid var(--sch-line); border-radius: 10px; padding: 10px 14px; margin-bottom: 8px; background: #f8faff; word-break: break-word; }
+.cal-equip { font-weight: 800; color: #1d4ed8; font-size: 14px; }
+.cal-meta  { color: var(--sch-muted); font-size: 13px; margin-top: 2px; }
+.pending-info { background: #fffbeb; border: 1px solid #fcd34d; border-radius: 12px; padding: 14px 16px; margin: 12px 0; font-size: 14px; color: #78350f; line-height: 1.6; }
+@media (max-width: 600px) { .sch-page { padding: 16px 12px 40px; } .sch-card { padding: 18px 14px 14px; border-radius: 12px; } .sch-hero h1 { font-size: 20px; } }
+{% endblock %}
+{% block content %}
+<div class="sch-page">
+  <div class="sch-hero">
+    <h1>Lab Equipment Scheduling</h1>
+    <p>CancerLab · University of Brasília</p>
+  </div>
+
+  {% if ext_user %}
+  <!-- LOGGED IN -->
+  <div class="sch-card" style="margin-bottom:16px">
+    <div style="font-weight:800;font-size:16px;color:#0f172a;margin-bottom:2px;">Welcome, {{ ext_user.full_name }}</div>
+    <div style="font-size:13px;color:#475569;margin-bottom:12px">{{ ext_user.email }} · FUB Registration: {{ ext_user.fub_registration }}</div>
+    <form method="post" action="{% url 'bookings:ext_logout' %}">{% csrf_token %}
+      <button type="submit" class="btn-ghost">Sign Out</button>
+    </form>
+  </div>
+
+  <!-- New booking form -->
+  <div class="sch-card">
+    <div class="sch-card-title">Request Equipment Booking</div>
+    <div class="pending-info">
+      <strong>Approval required:</strong> every booking request is reviewed by the laboratory team before it is confirmed. As soon as you submit, a confirmation e-mail is sent to you and a notification is sent to the lab (cancerlab@unb.br). You will be e-mailed again once your request is <strong>approved</strong> or declined.
+    </div>
+    <form method="post" action="{% url 'bookings:create_booking' %}">
+      {% csrf_token %}
+      <div class="form-group">
+        <label>Select Equipment *</label>
+        <select name="equipment_name" class="form-control" required>
+          {% for eq in equipment_list %}<option value="{{ eq }}">{{ eq }}</option>{% endfor %}
+        </select>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div class="form-group">
+          <label>Date *</label>
+          <input type="date" name="booking_date" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label>Time *</label>
+          <input type="time" name="booking_time" class="form-control" required min="08:00" max="14:00">
+          <div style="font-size:.78rem;color:#64748b;margin-top:3px">Lab hours: 08:00–14:00</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Notes (optional)</label>
+        <textarea name="notes" class="form-control" rows="2" placeholder="Special requirements or observations..."></textarea>
+      </div>
+      <button type="submit" class="btn-primary">Submit Booking Request</button>
+    </form>
+  </div>
+
+  <!-- My bookings -->
+  <div class="sch-card">
+    <div class="sch-card-title">My Bookings</div>
+    {% if bookings %}
+      {% for bk in bookings %}
+      <div class="booking-row">
+        <div class="booking-equip">
+          {{ bk.equipment_name }}
+          &nbsp;
+          {% if bk.status == "pending" %}<span class="status-pending">Pending Approval</span>
+          {% elif bk.status == "approved" or bk.status == "confirmed" %}<span class="status-approved">Approved</span>
+          {% elif bk.status == "rejected" %}<span class="status-rejected">Rejected</span>
+          {% elif bk.status == "cancelled" %}<span class="status-cancelled">Cancelled</span>{% endif %}
+        </div>
+        <div class="booking-meta">
+          Date: {{ bk.date_display }} · Time: {{ bk.time_display }}
+          {% if bk.notes %} · Notes: {{ bk.notes }}{% endif %}
+          · ID #{{ bk.pk }}
+        </div>
+        {% if bk.review_note %}<div class="booking-meta" style="margin-top:4px">Reviewer note: {{ bk.review_note }}</div>{% endif %}
+        {% if bk.status == "pending" or bk.status == "approved" or bk.status == "confirmed" %}
+        <form method="post" action="{% url 'bookings:cancel_booking' bk.pk %}" style="margin-top:8px"
+              onsubmit="return confirm('Cancel this booking?')">
+          {% csrf_token %}
+          <button type="submit" class="btn-ghost" style="font-size:.82rem;padding:5px 10px">Cancel booking</button>
+        </form>
+        {% endif %}
+      </div>
+      {% endfor %}
+    {% else %}
+      <p style="color:#64748b;font-size:.9rem">No bookings yet. Submit your first request above!</p>
+    {% endif %}
+  </div>
+
+  {% else %}
+  <!-- NOT LOGGED IN -->
+  <div class="sch-tabs">
+    <a class="sch-tab {% if view == 'login' or view == 'dashboard' %}active{% endif %}" href="?view=login">Sign In</a>
+    <a class="sch-tab {% if view == 'register' %}active{% endif %}" href="?view=register">Create Account</a>
+  </div>
+
+  {% if view == 'register' %}
+  <div class="sch-card">
+    <div class="sch-card-title">Create Your External Account</div>
+    <form method="post" action="{% url 'bookings:ext_register' %}">
+      {% csrf_token %}
+      <div class="form-group"><label>Full Name *</label><input type="text" name="full_name" class="form-control" required placeholder="Your full name"></div>
+      <div class="form-group"><label>E-mail *</label><input type="email" name="email" class="form-control" required placeholder="your@email.com"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div class="form-group"><label>Password *</label><input type="password" name="password" class="form-control" required placeholder="Min. 6 characters"></div>
+        <div class="form-group"><label>Confirm Password *</label><input type="password" name="password2" class="form-control" required></div>
+      </div>
+      <div class="form-group"><label>Phone *</label><input type="text" name="phone" class="form-control" required placeholder="+55 61 9 0000-0000"></div>
+      <div class="form-group"><label>FUB Registration Number *</label><input type="text" name="fub_registration" class="form-control" required placeholder="e.g.: 190012345"></div>
+      <button type="submit" class="btn-primary">Create Account</button>
+    </form>
+  </div>
+  {% else %}
+  <div class="sch-card">
+    <div class="sch-card-title">Sign In to Your Account</div>
+    <form method="post" action="{% url 'bookings:ext_login' %}">
+      {% csrf_token %}
+      <div class="form-group"><label>E-mail</label><input type="email" name="email" class="form-control" required placeholder="your@email.com"></div>
+      <div class="form-group"><label>Password</label><input type="password" name="password" class="form-control" required placeholder="Your password"></div>
+      <button type="submit" class="btn-primary">Sign In</button>
+    </form>
+    <div style="margin-top:12px;text-align:center;font-size:.9rem;color:#475569">No account? <a href="?view=register" style="color:var(--sch-blue);font-weight:700">Create one</a></div>
+  </div>
+  {% endif %}
+  {% endif %}
+
+  <!-- Public calendar -->
+  <div class="sch-card" style="margin-top:28px">
+    <div class="sch-card-title">Availability Calendar</div>
+    <p style="font-size:.88rem;color:#475569;margin-bottom:12px">Upcoming booked slots. Check availability before submitting a request.</p>
+    {% if upcoming %}
+      {% regroup upcoming by booking_date as date_list %}
+      {% for date_group in date_list %}
+        <div style="font-weight:800;font-size:14px;color:#0f172a;margin:12px 0 6px">{{ date_group.grouper }}</div>
+        {% for bk in date_group.list %}
+        <div class="cal-row">
+          <div class="cal-equip">{{ bk.equipment_name }}
+            {% if bk.status == "pending" %}<span style="font-size:11px;background:#fef9c3;color:#854d0e;padding:1px 6px;border-radius:999px;font-weight:700">Pending</span>{% endif %}
+          </div>
+          <div class="cal-meta">{{ bk.time_display }} · {{ bk.user_name }}</div>
+        </div>
+        {% endfor %}
+      {% endfor %}
+    {% else %}
+      <p style="color:#475569;font-size:.9rem">No upcoming booked slots. All times are currently available!</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+  // Prevent selecting a date in the past for the booking form.
+  (function () {
+    var d = document.querySelector('input[name="booking_date"]');
+    if (d) { d.min = new Date().toISOString().split('T')[0]; }
+  })();
+</script>
+{% endblock %}

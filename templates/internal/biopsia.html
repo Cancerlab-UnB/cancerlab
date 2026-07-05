@@ -1,0 +1,297 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Biópsia Líquida CCR – CancerLab{% endblock %}
+{% block extra_css %}
+:root { --primary:#173975; --primary-hover:#0A74B7; }
+.int-wrap { max-width: 1180px; margin: 24px auto; padding: 0 16px; }
+.int-header { display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-bottom:6px; }
+.int-title { font-weight:900; font-size:1.3rem; color:#0f172a; }
+.back-link { font-size:.9rem; color:var(--primary); text-decoration:none; font-weight:700; }
+.back-link:hover { text-decoration:underline; }
+.subtle { color:#475569; font-size:.9rem; margin-bottom:12px; }
+
+.legend { display:flex; gap:14px; flex-wrap:wrap; margin:10px 0 16px; font-size:.8rem; }
+.legend span { display:inline-flex; align-items:center; gap:6px; color:#334155; }
+.legend i { width:14px; height:14px; border-radius:4px; display:inline-block; border:1px solid rgba(0,0,0,.08); }
+.lg-future{ background:#dcfce7; } .lg-overdue{ background:#fee2e2; }
+.lg-auto{ background:#dbeafe; } .lg-collected{ background:#e2e8f0; } .lg-event{ background:#fecaca; }
+
+.table-scroll { overflow:auto; border-radius:12px; border:1px solid #e2e8f0; max-height:440px; }
+table.dt { border-collapse:collapse; width:100%; font-size:.83rem; }
+table.dt th { background:#f1f5f9; padding:8px 10px; text-align:left; font-weight:700; color:#0f172a;
+  border-bottom:1px solid #e2e8f0; white-space:nowrap; position:sticky; top:0; z-index:2; }
+table.dt td { padding:6px 10px; border-bottom:1px solid #f1f5f9; white-space:nowrap; color:#0f172a; }
+table.dt tr:hover td { filter:brightness(.98); }
+tr.row-event td { background:#fee2e2 !important; color:#7f1d1d; }
+td.c-future  { background:#dcfce7; color:#166534; font-weight:600; }
+td.c-overdue { background:#fee2e2; color:#991b1b; font-weight:600; }
+td.c-auto    { color:#1d4ed8; font-weight:700; }
+td.c-collected { color:#111827; font-weight:700; }
+.sel-link { color:var(--primary); font-weight:700; text-decoration:underline; cursor:pointer; }
+
+.card { background:#fff; border:1px solid #e2e8f0; border-radius:16px; padding:20px 22px;
+  box-shadow:0 8px 22px rgba(2,6,23,.06); margin-top:18px; }
+.card h3 { margin:0 0 4px; font-size:1.05rem; font-weight:900; color:#0f172a; }
+.card .hint { color:#64748b; font-size:.85rem; margin:0 0 14px; }
+
+.sched-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:10px; }
+.sched-item { border:1px solid #e2e8f0; border-radius:10px; padding:8px 10px; background:#f8fafc; }
+.sched-item .r { font-size:.72rem; color:#64748b; font-weight:700; text-transform:uppercase; letter-spacing:.4px; }
+.sched-item .v { font-size:.95rem; font-weight:700; margin-top:2px; }
+.sched-item.c-future  { background:#dcfce7; } .sched-item.c-future .v { color:#166534; }
+.sched-item.c-overdue { background:#fee2e2; } .sched-item.c-overdue .v { color:#991b1b; }
+.sched-item.c-auto .v { color:#1d4ed8; }
+.sched-item.c-collected .v { color:#111827; }
+
+.edit-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:12px; }
+.form-group label { display:block; font-size:.78rem; font-weight:700; color:#475569; margin-bottom:3px; }
+.form-control { width:100%; padding:8px 10px; border:1px solid #e2e8f0; border-radius:8px; font-size:.9rem;
+  background:#fff; color:#0f172a; }
+.form-control:focus { outline:none; border-color:var(--primary); }
+.row-inline { display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end; }
+
+.btn { padding:9px 16px; border:none; border-radius:10px; font-weight:700; cursor:pointer; font-size:.9rem; }
+.btn-primary { background:var(--primary); color:#fff; }
+.btn-primary:hover { background:var(--primary-hover); }
+.btn-ghost { background:#fff; color:#475569; border:1px solid #e2e8f0; text-decoration:none; display:inline-block; }
+.btn-green { background:#16a34a; color:#fff; }
+.btn-danger { background:#fff1f2; color:#b91c1c; border:1px solid #fecaca; }
+.btn-danger:hover { background:#ffe4e6; }
+
+.alert-err { background:#fee2e2; color:#991b1b; padding:14px 16px; border-radius:12px; margin-bottom:16px; }
+.alert-warn { background:#fef9c3; color:#854d0e; padding:14px 16px; border-radius:12px; margin-bottom:16px; }
+.danger-zone { border-color:#fecaca; background:#fff7f7; }
+details summary { cursor:pointer; font-weight:800; color:var(--primary); padding:10px 0; }
+.tcle-img { max-height:220px; border-radius:8px; border:1px solid #e2e8f0; display:block; margin-bottom:8px; }
+{% endblock %}
+{% block content %}
+<div class="int-wrap">
+  <div class="int-header">
+    <div class="int-title">Biópsia Líquida CCR — Entrada e Acompanhamento</div>
+    <a class="back-link" href="{% url 'internal:index' %}">← Voltar ao menu</a>
+  </div>
+
+  {% if error %}<div class="alert-err">{{ error }}</div>
+  {% elif not file_exists %}<div class="alert-warn">Arquivo Excel não encontrado. Coloque-o na raiz do projeto Django.</div>
+  {% else %}
+
+  <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:space-between">
+    <p class="subtle" style="margin:0">{{ total_rows }} paciente{{ total_rows|pluralize }}{% if total_rows > 120 %} · exibindo os primeiros 120{% endif %} · clique no identificador para acompanhar/editar.</p>
+    <form method="post" action="{% url 'internal:biopsia' %}" style="margin:0">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="recompute_all">
+      <button type="submit" class="btn btn-ghost" title="Recalcula cirurgia → BxL 7 para todos os pacientes">↻ Recalcular todos os cronogramas</button>
+    </form>
+  </div>
+
+  <p class="subtle" style="margin:6px 0 10px">
+    O sistema calcula automaticamente as coletas de <b>cada</b> paciente a partir da data de CIRURGIA
+    (BxL 2 = +1 mês · BxL 3 = +6 · BxL 4 = +12 · BxL 5 = +18 · BxL 6 = +24 · BxL 7 = +30).
+    Quando uma coleta atrasa, uma nova data <b>meio-termo</b> é calculada para minimizar o atraso.
+    Datas em azul são sugestões do sistema; coletas confirmadas e datas digitadas à mão são preservadas.
+  </p>
+
+  <div class="legend">
+    <span><i class="lg-future"></i> coleta futura (agendar)</span>
+    <span><i class="lg-overdue"></i> data passada / atrasada</span>
+    <span><i class="lg-auto"></i> data calculada pelo sistema</span>
+    <span><i class="lg-collected"></i> coletado</span>
+    <span><i class="lg-event"></i> retirado do estudo</span>
+  </div>
+
+  <!-- ══ TABELA DE PACIENTES ══ -->
+  <div class="table-scroll">
+    <table class="dt">
+      <thead><tr>{% for col in columns %}<th>{{ col|truncatechars:22 }}</th>{% endfor %}</tr></thead>
+      <tbody>
+        {% for row in rows %}
+        <tr {% if row.is_event %}class="row-event"{% endif %}>
+          <td><a class="sel-link" href="?sel={{ row.idx }}#edit-section">{{ row.id_value }}</a></td>
+          {% for cell in row.cells|slice:"1:" %}
+            <td class="{{ cell.cls }}">{{ cell.value|truncatechars:30 }}</td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ══ SELETOR DE PACIENTE ══ -->
+  <div class="card">
+    <h3>Paciente selecionado</h3>
+    <p class="hint">Escolha um paciente para ver o cronograma de coletas, registrar uma coleta e editar os dados.</p>
+    <div class="row-inline">
+      <select class="form-control" style="max-width:320px"
+              onchange="if(this.value!==''){window.location='?sel='+this.value+'#edit-section'}">
+        <option value="">— Selecione —</option>
+        {% for i, nome in patient_list %}
+          <option value="{{ i }}" {% if selected_idx == i %}selected{% endif %}>{{ nome }}</option>
+        {% endfor %}
+      </select>
+      {% if selected_patient is not None %}<span style="font-weight:800;color:#0f172a">{{ selected_patient }}</span>{% endif %}
+    </div>
+  </div>
+
+  {% if selected_idx is not None %}
+
+  <!-- ══ CRONOGRAMA BxL + REGISTRAR COLETA ══ -->
+  <div class="card" id="registrar">
+    <h3>Cronograma de coletas — BxL</h3>
+    <p class="hint">Datas calculadas automaticamente a partir da CIRURGIA (BxL 2 = +1 mês · BxL 3 = +6 · BxL 4 = +12 · BxL 5 = +18 · BxL 6 = +24 · BxL 7 = +30). Coletas atrasadas recebem uma data meio-termo. Azul = sugerida pelo sistema · verde = a agendar · vermelho = atrasada · preto = coletada.</p>
+
+    {% if seq_info %}
+    <div class="sched-grid" style="margin-bottom:16px">
+      {% for s in seq_info %}
+      <div class="sched-item {{ s.cls }}">
+        <div class="r">{{ s.rotulo }}</div>
+        <div class="v">{{ s.value|default:"—" }}</div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <form method="post" action="?sel={{ selected_idx }}" style="margin-bottom:8px">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="autofill">
+      <input type="hidden" name="idx" value="{{ selected_idx }}">
+      <button type="submit" class="btn btn-ghost">Recalcular cronograma deste paciente</button>
+    </form>
+
+    <hr style="border:none;border-top:1px solid #eef2f7;margin:16px 0">
+    <h3 style="font-size:.98rem">Registrar coleta</h3>
+    <p class="hint">Marca a coluna BxL escolhida como coletada na data informada (registro em REGISTRO_COLETAS).</p>
+    <form method="post" action="?sel={{ selected_idx }}">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="register_bxl">
+      <input type="hidden" name="idx" value="{{ selected_idx }}">
+      <div class="row-inline">
+        <div class="form-group" style="min-width:220px">
+          <label>Coluna BxL</label>
+          <select name="col_bxl" class="form-control">
+            {% for c in bxl_cols %}<option value="{{ c }}">{{ c|truncatechars:36 }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Data da coleta</label>
+          <input type="date" name="data_coleta" value="{{ today_iso }}" class="form-control">
+        </div>
+        <div class="form-group" style="flex:1;min-width:200px">
+          <label>Observação (opcional)</label>
+          <input type="text" name="obs_bxl" class="form-control" placeholder="ex.: coleta em jejum">
+        </div>
+        <button type="submit" class="btn btn-green">Registrar coleta</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- ══ EDITAR DADOS ══ -->
+  <div class="card" id="edit-section">
+    <h3>Editar dados do paciente</h3>
+    <p class="hint">Alterar CIRURGIA ou uma coluna BxL recalcula automaticamente as datas futuras ao salvar.</p>
+    <form method="post" action="?sel={{ selected_idx }}">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="save_row">
+      <input type="hidden" name="idx" value="{{ selected_idx }}">
+      <div class="edit-grid">
+        {% for col, val in selected_fields %}
+        <div class="form-group">
+          <label>{{ col|truncatechars:40 }}</label>
+          <input type="text" name="col_{{ col }}" class="form-control" value="{{ val }}">
+        </div>
+        {% endfor %}
+      </div>
+      <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">
+        <button type="submit" class="btn btn-primary">Salvar alterações</button>
+        <a href="{% url 'internal:biopsia' %}" class="btn btn-ghost">Cancelar</a>
+      </div>
+    </form>
+  </div>
+
+  <!-- ══ TCLE ══ -->
+  <div class="card" id="tcle">
+    <h3>TCLE do paciente</h3>
+    {% if tcle_exists %}
+      {% if tcle_url %}<img src="{{ tcle_url }}" alt="TCLE" class="tcle-img" onerror="this.style.display='none'">{% endif %}
+      <p class="hint">Já existe um TCLE enviado para este paciente. Para substituir, envie um novo arquivo.</p>
+    {% else %}
+      <p class="hint">Nenhum TCLE enviado ainda.</p>
+    {% endif %}
+    <form method="post" action="?sel={{ selected_idx }}" enctype="multipart/form-data">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="upload_tcle">
+      <input type="hidden" name="idx" value="{{ selected_idx }}">
+      <div class="row-inline">
+        <input type="file" name="tcle_foto" accept=".jpg,.jpeg,.png" class="form-control" style="max-width:340px" required>
+        <button type="submit" class="btn btn-primary">Enviar foto do TCLE</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- ══ RETIRAR DO ESTUDO ══ -->
+  <div class="card danger-zone">
+    <h3>Retirar paciente do estudo</h3>
+    <p class="hint">Ação definitiva. O identificador será padronizado (ex.: <b>CBLn (exc)</b> ou <b>CBLn (+) (exc)</b> em caso de falecimento) e as células vazias recebem o status de exclusão.</p>
+    <form method="post" action="?sel={{ selected_idx }}"
+          onsubmit="return confirm('Confirmar a retirada de {{ selected_patient }} do estudo? Essa ação é definitiva.')">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="exclude_patient">
+      <input type="hidden" name="idx" value="{{ selected_idx }}">
+      <div class="row-inline">
+        <div class="form-group">
+          <label>Motivo da retirada</label>
+          <select name="motivo" class="form-control">
+            {% for m in motivos_exclusao %}<option value="{{ m }}">{{ m }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Data da exclusão</label>
+          <input type="date" name="data_exclusao" value="{{ today_iso }}" class="form-control">
+        </div>
+        <button type="submit" class="btn btn-danger">Retirar do estudo</button>
+      </div>
+    </form>
+
+    <hr style="border:none;border-top:1px solid #f3d6d6;margin:16px 0">
+    <p class="hint">Remover completamente a linha do paciente da planilha (irreversível).</p>
+    <form method="post" action="{% url 'internal:biopsia' %}"
+          onsubmit="return confirm('Remover DEFINITIVAMENTE {{ selected_patient }} da planilha?')">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="remove_patient">
+      <input type="hidden" name="idx" value="{{ selected_idx }}">
+      <button type="submit" class="btn btn-danger">Remover paciente da planilha</button>
+    </form>
+  </div>
+
+  {% endif %}
+
+  <!-- ══ NOVO PACIENTE ══ -->
+  <details style="margin-top:22px" id="novo" {% if not selected_idx %}open{% endif %}>
+    <summary>Adicionar novo paciente</summary>
+    <div class="card" style="margin-top:10px">
+      <form method="post" action="{% url 'internal:biopsia' %}" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="add_patient">
+        <div class="edit-grid">
+          <div class="form-group">
+            <label>{{ id_col }} (identificador)</label>
+            <input type="text" name="new_id" class="form-control" placeholder="ex.: CBL147" required>
+          </div>
+          {% for col in columns|slice:"1:" %}
+          <div class="form-group">
+            <label>{{ col|truncatechars:40 }}</label>
+            <input type="text" name="new_{{ col }}" class="form-control">
+          </div>
+          {% endfor %}
+        </div>
+        <div class="form-group" style="margin-top:12px">
+          <label>Foto do TCLE (obrigatório)</label>
+          <input type="file" name="tcle_foto" accept=".jpg,.jpeg,.png" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-primary" style="margin-top:12px">Adicionar paciente</button>
+      </form>
+    </div>
+  </details>
+
+  {% endif %}
+</div>
+{% endblock %}

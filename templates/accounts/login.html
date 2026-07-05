@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Internal Access – CancerLab{% endblock %}
+{% block extra_css %}
+.auth-outer { max-width: 440px; margin: 48px auto; padding: 0 16px; }
+.auth-card { background: #fff; border: 1px solid rgba(2,6,23,.08); border-radius: 20px; padding: 32px 28px; box-shadow: 0 16px 40px rgba(2,6,23,.10); }
+.auth-title { font-weight: 900; font-size: 1.5rem; color: #0f172a; margin-bottom: 4px; }
+.auth-sub { color: #475569; font-size: .9rem; margin-bottom: 24px; }
+.form-group { margin-bottom: 14px; }
+.form-group label { display: block; font-weight: 700; margin-bottom: 4px; color: #1F2A37; font-size: .9rem; }
+.form-control { width: 100%; padding: .55rem .75rem; border: 1px solid #C5D1DE; border-radius: .6rem; background: #EDF2F7; color: #111827; font-size: 15px; transition: border-color .2s; }
+.form-control:focus { outline: none; border-color: #173975; box-shadow: 0 0 0 3px rgba(23,57,117,.15); }
+.form-control::placeholder { color: #6B7280; }
+.btn-submit { width: 100%; padding: 11px; background: #173975; color: #fff; border: none; border-radius: 1rem; font-size: 1.05rem; font-weight: 800; cursor: pointer; transition: .2s; margin-top: 4px; }
+.btn-submit:hover { background: #0A74B7; }
+.form-error { color: #dc2626; font-size: .85rem; margin-top: 3px; }
+.forgot-link { font-size: .85rem; color: #475569; margin-top: 8px; display: block; }
+.forgot-link a { color: #00385C; text-decoration: none; }
+.forgot-link a:hover { text-decoration: underline; }
+.divider { border: none; border-top: 1px solid #e6e8ee; margin: 18px 0; }
+.create-link { text-align: center; font-size: .9rem; color: #475569; }
+.create-link a { color: #173975; font-weight: 700; text-decoration: none; }
+{% endblock %}
+{% block content %}
+<div class="auth-outer">
+  <div class="auth-card">
+    <div class="auth-title">Internal Access</div>
+    <div class="auth-sub">Restricted area for laboratory members.</div>
+    <form method="post" action="{% url 'accounts:login' %}{% if request.GET.next %}?next={{ request.GET.next }}{% endif %}">
+      {% csrf_token %}
+      <div class="form-group">
+        <label for="id_cpf">CPF</label>
+        <input type="text" id="id_cpf" name="cpf" class="form-control" placeholder="Enter your CPF (digits only)" value="{{ form.cpf.value|default:'' }}" autocomplete="username">
+        {% for e in form.cpf.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+      </div>
+      <div class="form-group">
+        <label for="id_password">Password</label>
+        <input type="password" id="id_password" name="password" class="form-control" placeholder="Enter your password" autocomplete="current-password">
+        {% for e in form.password.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+      </div>
+      {% if form.non_field_errors %}<div class="form-error" style="margin-bottom:10px">{{ form.non_field_errors }}</div>{% endif %}
+      <button type="submit" class="btn-submit">Sign In</button>
+    </form>
+    <span class="forgot-link"><a href="{% url 'accounts:password_reset_request' %}">Forgot my password</a></span>
+    <hr class="divider">
+    <div class="create-link">No account? <a href="{% url 'accounts:register' %}">Create account</a></div>
+  </div>
+</div>
+{% endblock %}

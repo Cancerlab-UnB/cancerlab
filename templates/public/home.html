@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}CancerLab – Laboratory of Molecular Pathology of Cancer{% endblock %}
+{% block extra_css %}
+/* --- Hero layout (exact original) --- */
+.hero {
+  display: grid; gap: 26px; align-items: start;
+  grid-template-columns: 1fr;
+  grid-template-areas: "head" "left" "center" "right";
+}
+.hero .col-head   { grid-area: head; }
+.hero .col-left   { grid-area: left; }
+.hero .col-center { grid-area: center; }
+.hero .col-right  { grid-area: right; }
+@media (min-width: 700px) {
+  .hero { grid-template-columns: 1fr 1fr; grid-template-areas: "head head" "center center" "left right"; gap: 28px; }
+}
+@media (min-width: 1100px) {
+  .hero { grid-template-columns: 0.9fr 1.2fr 0.9fr; grid-template-areas: "head head head" "left center right"; gap: 32px; }
+  .col-left  { justify-self: start; }
+  .col-right { justify-self: end; }
+  .col-left .imgframe, .col-right .imgframe { width: 88%; }
+}
+.title { font-size: clamp(32px, 5vw, 56px); font-weight: 800; color: #0f172a; margin: 6px 0 12px; line-height: 1.08; letter-spacing: -0.01em; }
+.col-head { text-align: center; display: flex; flex-direction: column; align-items: center; }
+.col-head .title { text-align: center; position: relative; }
+.col-head .title::after {
+  content: ""; display: block; height: 3px; width: 84px; margin: 10px auto 0; border-radius: 3px;
+  background: linear-gradient(90deg, var(--primary, #1351d8), rgba(19,81,216,.25));
+}
+.lead { color: #374151; line-height: 1.75; font-size: 17px; max-width: 72ch; }
+.hero .title + .lead { color: #1351d8; font-weight: 700; font-size: clamp(18px, 2.1vw, 20px); line-height: 1.55; margin-top: 14px; text-align: center; }
+.wrap a { color: #1351d8; text-decoration: none; border-bottom: 1px dashed rgba(19,81,216,.35); }
+.wrap a:hover { text-decoration: underline; }
+.imgframe {
+  border: 1px solid #e7e7ef; border-radius: 16px; overflow: hidden; background: #fff;
+  box-shadow: 0 12px 34px rgba(2,6,23,.10);
+  transition: transform .25s ease, box-shadow .25s ease;
+}
+.imgframe img { width: 100%; height: auto; display: block; }
+.imgframe:hover { transform: translateY(-2px); box-shadow: 0 16px 42px rgba(2,6,23,.14); }
+@media (prefers-reduced-motion: reduce) { .imgframe, .stack-card { transition: none; transform: none; } }
+.col-center .stack-cards { max-width: 72ch; margin: 10px auto 0; display: grid; grid-template-columns: 1fr; gap: 18px; }
+.stack-card {
+  position: relative; padding: 20px 24px; border-radius: 16px;
+  background: linear-gradient(#ffffff, #ffffff) padding-box, linear-gradient(180deg, rgba(19,81,216,.20), rgba(19,81,216,0)) border-box;
+  border: 1px solid #e6eaf4; box-shadow: 0 12px 28px rgba(2,6,23,.08);
+  transition: box-shadow .25s ease, transform .25s ease;
+}
+.stack-card:hover { transform: translateY(-2px); box-shadow: 0 16px 38px rgba(2,6,23,.12); }
+.stack-card h3 { margin: 0 0 8px; font-weight: 700; font-size: clamp(17px, 1.9vw, 20px); line-height: 1.28; letter-spacing: -.005em; color: #0f172a; }
+.stack-card h3::after { content: ""; display: block; height: 2px; width: 54px; margin-top: 8px; border-radius: 2px; background: linear-gradient(90deg, #1351d8, rgba(19,81,216,.20)); }
+.stack-card p { margin: 10px 0 0; font-size: 16.5px; line-height: 1.75; color: #0f172a; }
+.stack-card ul { margin: 10px 0 0; padding-left: 22px; }
+.stack-card li { margin: 4px 0; line-height: 1.7; color: #0f172a; }
+.landmarks { margin: 42px auto 6px; }
+.landmarks .lm-title { text-align: center; font-weight: 800; color: #0f172a; font-size: clamp(20px, 3vw, 28px); margin: 2px 0 14px; }
+.landmarks .imgframe { border-radius: 18px; }
+.landmarks .caption { text-align: center; color: #475569; font-size: 13.5px; margin-top: 8px; }
+.map-section { margin: 26px auto 8px; }
+.map-title { text-align: center; font-weight: 800; color: #0b1220; font-size: clamp(20px, 3vw, 28px); margin: 6px 0 14px; }
+.map-grid { display: grid; grid-template-columns: 1fr; gap: 16px; align-items: stretch; max-width: 1180px; margin: 0 auto; }
+@media (min-width: 980px) { .map-grid { grid-template-columns: 1.2fr .8fr; gap: 18px; } }
+.map-card { position: relative; border-radius: 18px; overflow: hidden; border: 1px solid #e6e8ee; background: #fff; box-shadow: 0 16px 36px rgba(2,6,23,.12); }
+.map-frame { position: relative; width: 100%; aspect-ratio: 16/9; background: #e5eefb; }
+.map-frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.map-frame::after {
+  content: ""; position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%);
+  width: 64px; height: 64px; border-radius: 50%;
+  box-shadow: 0 0 0 2px rgba(19,81,216,.25), 0 0 0 12px rgba(19,81,216,.06); pointer-events: none;
+}
+.map-badge {
+  position: absolute; left: 12px; top: 12px; background: rgba(255,255,255,.92);
+  border: 1px solid #e2e8f0; backdrop-filter: blur(6px);
+  padding: 4px 10px; border-radius: 999px; font-weight: 800; font-size: .8rem; color: #0b1220;
+}
+.info-card { border: 1px solid #e6e8ee; border-radius: 18px; background: #ffffff; box-shadow: 0 12px 28px rgba(2,6,23,.08); padding: 16px 18px; }
+.info-card h3 { margin: 0 0 8px; font-size: 18px; font-weight: 800; color: #0b1220; }
+.addr-txt { color: #111827; line-height: 1.6; }
+.btns { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+.btn { display: inline-block; padding: 10px 14px; border-radius: 10px; text-decoration: none; font-weight: 900; background: #1351d8; color: #ffffff !important; line-height: 1; text-shadow: 0 1px 0 rgba(0,0,0,.25); border: none; }
+.btn.alt { background: #ffffff; color: #0b1220 !important; border: 1px solid #dbe2f1; text-shadow: none; }
+.wrap a.btn, .wrap a.btn.alt { border-bottom: none !important; }
+{% endblock %}
+{% block content %}
+<div class="wrap">
+  <div class="hero">
+    <div class="col-head">
+      <div class="title">CancerLab – Laboratory of Molecular Pathology of Cancer</div>
+      <p class="lead">The Laboratory of Molecular Pathology of Cancer (CancerLab) at the University of Brasília is dedicated to advancing cancer research through the development of innovative liquid biopsy tools and the investigation of molecular targets both genetic and epigenetic that drive carcinogenesis. Our ultimate goal is to translate these discoveries into novel diagnostic and prognostic strategies that can improve cancer treatment and patient care</p>
+    </div>
+    <!-- Left image -->
+    <div class="col-left">
+      <div class="imgframe">
+        <img src="{% static 'img/imghome1.jpg' %}" alt="CancerLab – left illustrative image" loading="lazy">
+      </div>
+    </div>
+    <div class="col-center">
+      <div class="stack-cards">
+        <article class="stack-card">
+          <h3>Our Mission</h3>
+          <p>We are committed to training highly qualified professionals in innovative techniques of gene editing, genomics, and liquid biopsy. Our work is dedicated to advancing prevention and comprehensive care for oncology patients, while also developing cutting edge products and services that strengthen scientific and technological innovation in health.</p>
+        </article>
+        <article class="stack-card">
+          <h3>Our Research</h3>
+          <p>Our research focuses on:</p>
+          <ul>
+            <li><strong>Liquid biopsy:</strong> studying circulating tumor DNA (ctDNA) for clinical applications.</li>
+            <li><strong>Epigenetics:</strong> investigating the role of methyltransferase enzymes in solid tumors and leukemias.</li>
+            <li><strong>Gene editing:</strong> developing CRISPR/Cas9-based strategies for selective knockout (KO) in cancer.</li>
+          </ul>
+        </article>
+        <article class="stack-card">
+          <h3>Our Team</h3>
+          <p>The Laboratory of Molecular Pathology of Cancer (CancerLab) is the operational unit of two research groups at the University of Brasília: <a href="http://dgp.cnpq.br/dgp/espelhogrupo/769498">Patologia Molecular do Câncer</a> (created in 2008) and <a href="http://dgp.cnpq.br/dgp/espelhogrupo/775959">Desenvolvimento e Aplicações em Biópsia Líquida</a> (created in 2022). Together, these initiatives bring together researchers dedicated to exploring the molecular mechanisms of human carcinogenesis and translating discoveries into clinical applications.</p>
+          <p>Our team integrates expertise across Clinical Pathology, Molecular Biology, Biochemistry, Immunology, and Genetics creating a truly multidisciplinary environment to drive high-impact research in cancer biology.</p>
+        </article>
+        <article class="stack-card">
+          <h3>Looking Ahead</h3>
+          <p>We aim to expand our collaborations with leading research centers across Brazil and abroad, fostering student and researcher exchanges that will strengthen our scientific network and amplify the global reach of our discoveries.</p>
+        </article>
+      </div>
+    </div>
+    <div class="col-right">
+      <div class="imgframe">
+        <img src="{% static 'img/imghome2.jpg' %}" alt="CancerLab – right illustrative image" loading="lazy">
+      </div>
+    </div>
+  </div>
+
+  <section class="landmarks" aria-label="Landmarks timeline">
+    <div class="lm-title">Landmarks</div>
+    <div class="imgframe">
+      <img src="{% static 'img/landmarks.jpg' %}" alt="CancerLab timeline of key milestones" loading="lazy">
+    </div>
+  </section>
+
+  <section class="map-section" aria-label="Location map">
+    <div class="map-title">Where to find us</div>
+    <div class="map-grid">
+      <div class="map-card">
+        <div class="map-frame">
+          <iframe
+            src="https://www.openstreetmap.org/export/embed.html?bbox=-47.877102219944763,-15.777937821610322,-47.857102219944763,-15.757937821610321&amp;layer=mapnik&amp;marker=-15.767937821610321,-47.86710221994476"
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+            title="CancerLab location map"
+          ></iframe>
+        </div>
+        <div class="map-badge">OpenStreetMap · Marker at -15.767938, -47.867102</div>
+      </div>
+      <div class="info-card">
+        <h3>Laboratory location</h3>
+        <div class="addr-txt">Campus Universitário Darcy Ribeiro<br>Brasília - DF - s/n<br>CEP 70910-000</div>
+        <div class="btns">
+          <a class="btn" href="https://www.google.com/maps?q=-15.767937821610321,-47.86710221994476" target="_blank" rel="noopener">View on Google Maps</a>
+          <a class="btn alt" href="https://www.openstreetmap.org/?mlat=-15.767937821610321&mlon=-47.86710221994476#map=17/-15.767937821610321/-47.86710221994476" target="_blank" rel="noopener">OpenStreetMap</a>
+          <a class="btn" href="https://www.google.com/maps?daddr=-15.767937821610321,-47.86710221994476" target="_blank" rel="noopener">Directions</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}

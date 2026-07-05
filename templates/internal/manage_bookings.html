@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+{% block title %}Gerenciar Agendamentos – CancerLab{% endblock %}
+{% block extra_css %}
+:root { --primary:#173975; }
+.mb-wrap { max-width: 1100px; margin: 24px auto; padding: 0 16px; }
+.mb-header { display: flex; align-items: center; gap: 14px; margin-bottom: 8px; flex-wrap: wrap; }
+.mb-title { font-weight: 900; font-size: 1.4rem; color: #0f172a; }
+.mb-back { font-size: .9rem; color: var(--primary); text-decoration: none; }
+.mb-back:hover { text-decoration: underline; }
+.mb-desc { color: #475569; margin-bottom: 18px; font-size: .93rem; }
+.metrics { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+.metric { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px 16px; min-width: 100px; text-align: center; }
+.metric-v { font-weight: 900; font-size: 1.6rem; }
+.metric-l { color: #475569; font-size: .8rem; }
+.section-title { font-weight: 800; font-size: 1rem; margin-bottom: 12px; color: #0f172a; padding-bottom: 4px; border-bottom: 2px solid rgba(42,77,181,.2); }
+.mb-row { border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; background: #fafbfe; word-break: break-word; }
+.mb-row-pending { border-left: 4px solid #f59e0b !important; background: #fffdf7 !important; }
+.mb-equip { font-weight: 800; font-size: 15px; color: #0f172a; margin-bottom: 4px; }
+.mb-meta  { font-size: 13px; color: #475569; margin-top: 4px; line-height: 1.5; }
+.mb-user  { font-size: 13px; color: #1d4ed8; margin-top: 4px; font-weight: 700; }
+.badge-pending  { display:inline-block;padding:2px 10px;border-radius:999px;background:#fef9c3;color:#854d0e;font-size:12px;font-weight:800; }
+.badge-approved { display:inline-block;padding:2px 10px;border-radius:999px;background:#dcfce7;color:#166534;font-size:12px;font-weight:800; }
+.badge-rejected { display:inline-block;padding:2px 10px;border-radius:999px;background:#fee2e2;color:#b91c1c;font-size:12px;font-weight:800; }
+.badge-cancelled{ display:inline-block;padding:2px 10px;border-radius:999px;background:#f1f5f9;color:#64748b;font-size:12px;font-weight:800; }
+.review-input { width: 100%; padding: 7px 10px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: .88rem; margin-bottom: 8px; background: #fff; }
+.btn-approve { padding: 6px 12px; background: #16a34a; color: #fff; border: none; border-radius: 8px; font-weight: 700; font-size: .88rem; cursor: pointer; }
+.btn-reject  { padding: 6px 12px; background: #dc2626; color: #fff; border: none; border-radius: 8px; font-weight: 700; font-size: .88rem; cursor: pointer; }
+.btn-cancel  { padding: 6px 12px; background: #fff; color: #475569; border: 1px solid #e2e8f0; border-radius: 8px; font-weight: 700; font-size: .88rem; cursor: pointer; }
+.action-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.filter-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 20px; }
+.filter-row select, .filter-row input[type="date"] { padding: 7px 10px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: .9rem; background: #fff; }
+.filter-btn { padding: 8px 14px; background: var(--primary); color: #fff; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: .9rem; }
+.audit-row { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 12px; margin-bottom: 4px; font-size: 12px; color: #334155; line-height: 1.6; word-break: break-word; }
+.section-tabs { display: flex; gap: 0; border-bottom: 2px solid #e2e8f0; margin-bottom: 20px; }
+.section-tabs a { padding: 10px 16px; font-weight: 700; color: #475569; text-decoration: none; border-bottom: 2px solid transparent; margin-bottom: -2px; }
+.section-tabs a:hover { color: var(--primary); }
+{% endblock %}
+{% block content %}
+<div class="mb-wrap">
+  <div class="mb-header">
+    <div class="mb-title">Gerenciamento de Agendamentos</div>
+    <a class="mb-back" href="{% url 'internal:index' %}">Voltar ao Painel</a>
+  </div>
+  <p class="mb-desc">Painel interno para gerenciar todos os agendamentos de equipamentos. Todas as ações são registradas.</p>
+
+  <div class="metrics">
+    <div class="metric"><div class="metric-v">{{ total }}</div><div class="metric-l">Total</div></div>
+    <div class="metric"><div class="metric-v" style="color:#854d0e">{{ n_pending }}</div><div class="metric-l">Pendentes</div></div>
+    <div class="metric"><div class="metric-v" style="color:#166534">{{ n_approved }}</div><div class="metric-l">Aprovados</div></div>
+    <div class="metric"><div class="metric-v" style="color:#b91c1c">{{ n_rejected }}</div><div class="metric-l">Rejeitados</div></div>
+    <div class="metric"><div class="metric-v" style="color:#64748b">{{ n_cancelled }}</div><div class="metric-l">Cancelados</div></div>
+  </div>
+
+  <div class="section-tabs">
+    <a href="#pending">Aguardando Aprovação ({{ n_pending }})</a>
+    <a href="#all">Todos os Agendamentos</a>
+    <a href="#audit">Log de Auditoria</a>
+  </div>
+
+  <!-- PENDING -->
+  <section id="pending" style="margin-bottom:40px">
+    <div class="section-title">Solicitações Aguardando Revisão</div>
+    {% if not pending %}
+    <div style="background:#dcfce7;color:#166534;padding:12px 16px;border-radius:10px;font-weight:600">Nenhuma solicitação pendente. Todas foram revisadas.</div>
+    {% else %}
+    {% for bk in pending %}
+    <div class="mb-row mb-row-pending">
+      <div class="mb-equip">{{ bk.equipment_name }} &nbsp; <span class="badge-pending">Aguardando Aprovacao</span></div>
+      <div class="mb-meta">{{ bk.date_display }} · {{ bk.time_display }} · Enviado: {{ bk.created_at|date:"d/m/Y H:i" }}</div>
+      <div class="mb-user">{{ bk.user_name }} — {{ bk.user_email }} — {{ bk.user_phone }} — FUB: {{ bk.user_fub }}</div>
+      {% if bk.notes %}<div class="mb-meta">Obs.: {{ bk.notes }}</div>{% endif %}
+      <div class="mb-meta">ID #{{ bk.pk }}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
+        <form method="post" action="{% url 'internal:approve_booking' bk.pk %}">
+          {% csrf_token %}
+          <input class="review-input" name="review_note" placeholder="Observação (opcional)">
+          <button type="submit" class="btn-approve" style="width:100%">Aprovar #{{ bk.pk }}</button>
+        </form>
+        <form method="post" action="{% url 'internal:reject_booking' bk.pk %}">
+          {% csrf_token %}
+          <input class="review-input" name="review_note" placeholder="Observação (opcional)">
+          <button type="submit" class="btn-reject" style="width:100%">Rejeitar #{{ bk.pk }}</button>
+        </form>
+      </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+  </section>
+
+  <!-- ALL BOOKINGS -->
+  <section id="all" style="margin-bottom:40px">
+    <div class="section-title">Todos os Agendamentos</div>
+    <form method="get" action="#all">
+      <div class="filter-row">
+        <div>
+          <select name="equipment">
+            <option value="">Todos os equipamentos</option>
+            {% for eq in equipment_list %}<option value="{{ eq }}" {% if eq_filter == eq %}selected{% endif %}>{{ eq }}</option>{% endfor %}
+          </select>
+        </div>
+        <div>
+          <select name="status">
+            <option value="">Todos os status</option>
+            <option value="pending" {% if st_filter == "pending" %}selected{% endif %}>Pendente</option>
+            <option value="approved" {% if st_filter == "approved" %}selected{% endif %}>Aprovado</option>
+            <option value="rejected" {% if st_filter == "rejected" %}selected{% endif %}>Rejeitado</option>
+            <option value="cancelled" {% if st_filter == "cancelled" %}selected{% endif %}>Cancelado</option>
+          </select>
+        </div>
+        <div><input type="date" name="date" value="{{ date_filter }}"></div>
+        <button type="submit" class="filter-btn">Filtrar</button>
+        <a href="{% url 'internal:manage_bookings' %}#all" style="padding:8px 12px;color:#475569;font-size:.9rem;text-decoration:none">Limpar</a>
+      </div>
+    </form>
+    <p style="font-size:.88rem;color:#475569;margin-bottom:10px"><strong>{{ page_obj.paginator.count }}</strong> agendamento(s)</p>
+    {% for bk in page_obj %}
+    <div class="mb-row {% if bk.status == 'pending' %}mb-row-pending{% endif %}">
+      <div class="mb-equip">{{ bk.equipment_name }} &nbsp;
+        {% if bk.status == "pending" %}<span class="badge-pending">Pendente</span>
+        {% elif bk.status == "approved" or bk.status == "confirmed" %}<span class="badge-approved">Aprovado</span>
+        {% elif bk.status == "rejected" %}<span class="badge-rejected">Rejeitado</span>
+        {% else %}<span class="badge-cancelled">Cancelado</span>{% endif %}
+      </div>
+      <div class="mb-meta">{{ bk.date_display }} · {{ bk.time_display }} · ID #{{ bk.pk }}</div>
+      <div class="mb-user">{{ bk.user_name }} — {{ bk.user_email }} — {{ bk.user_phone }} — FUB: {{ bk.user_fub }}</div>
+      {% if bk.review_note %}<div class="mb-meta">Revisor: {{ bk.reviewed_by }} · {{ bk.review_note }}</div>{% endif %}
+      <div class="action-row">
+        {% if bk.status == "pending" %}
+          <form method="post" action="{% url 'internal:approve_booking' bk.pk %}" style="display:inline">{% csrf_token %}<button class="btn-approve">Aprovar</button></form>
+          <form method="post" action="{% url 'internal:reject_booking' bk.pk %}" style="display:inline">{% csrf_token %}<button class="btn-reject">Rejeitar</button></form>
+        {% endif %}
+        {% if bk.status == "pending" or bk.status == "approved" or bk.status == "confirmed" %}
+          <form method="post" action="{% url 'internal:cancel_booking' bk.pk %}" style="display:inline" onsubmit="return confirm('Cancelar reserva #{{ bk.pk }}?')">
+            {% csrf_token %}<button class="btn-cancel">Cancelar</button>
+          </form>
+        {% endif %}
+      </div>
+    </div>
+    {% empty %}
+    <p style="color:#475569">Nenhum agendamento encontrado.</p>
+    {% endfor %}
+    {% if page_obj.has_other_pages %}
+    <div style="display:flex;gap:8px;margin-top:14px;justify-content:center">
+      {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}#all" style="padding:7px 12px;border:1px solid #e2e8f0;border-radius:8px;color:#475569;text-decoration:none">Anterior</a>{% endif %}
+      <span style="padding:7px 12px;color:#475569;font-size:.9rem">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+      {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}#all" style="padding:7px 12px;border:1px solid #e2e8f0;border-radius:8px;color:#475569;text-decoration:none">Proxima</a>{% endif %}
+    </div>
+    {% endif %}
+  </section>
+
+  <!-- AUDIT LOG -->
+  <section id="audit" style="margin-bottom:40px">
+    <div class="section-title">Log de Auditoria</div>
+    <p style="color:#475569;font-size:.86rem;margin-bottom:10px">Registro completo de todas as acoes. Exibindo ate 200 entradas.</p>
+    {% for log in audit_logs %}
+    <div class="audit-row">
+      <strong>{{ log.action|upper }}</strong>
+      · Reserva #{{ log.booking_id }}
+      · Por: {{ log.performed_by }}
+      · {{ log.created_at|date:"d/m/Y H:i" }}
+      {% if log.note %}<br><span style="color:#64748b">Obs.: {{ log.note }}</span>{% endif %}
+    </div>
+    {% empty %}
+    <p style="color:#475569">Sem entradas no log.</p>
+    {% endfor %}
+  </section>
+</div>
+{% endblock %}

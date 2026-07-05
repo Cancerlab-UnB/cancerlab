@@ -1,0 +1,272 @@
+{% extends "base.html" %}
+{% block title %}Painel de Dados – CancerLab{% endblock %}
+{% block extra_head %}
+<script src="https://cdn.plot.ly/plotly-2.27.0.min.js" charset="utf-8"></script>
+{% endblock %}
+{% block extra_css %}
+:root { --primary:#173975; }
+.dash-wrap { max-width: 1180px; margin: 24px auto; padding: 0 16px; }
+.dash-header { display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-bottom:14px; }
+.dash-title { font-weight:900; font-size:1.4rem; color:#0f172a; }
+.back-link { font-size:.9rem; color:var(--primary); text-decoration:none; }
+.back-link:hover { text-decoration:underline; }
+.src-tabs { display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap; }
+.src-tab { padding:9px 16px; border-radius:10px; border:1px solid #e2e8f0; background:#fff; color:#0f172a;
+           font-weight:700; text-decoration:none; font-size:.92rem; }
+.src-tab.active { background:var(--primary); color:#fff; border-color:var(--primary); }
+.card { background:#fff; border:1px solid #e2e8f0; border-radius:16px; padding:20px; box-shadow:0 8px 22px rgba(2,6,23,.06); margin-bottom:20px; }
+.card-title { font-weight:800; font-size:1.1rem; color:#0f172a; margin-bottom:14px; }
+.metrics { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:6px; }
+.metric { background:#f8faff; border:1px solid #e2e8f0; border-radius:12px; padding:14px 18px; min-width:120px; text-align:center; }
+.metric-v { font-weight:900; font-size:1.5rem; color:#0f172a; }
+.metric-l { color:#475569; font-size:.8rem; margin-top:2px; }
+.filter-row { display:flex; gap:14px; flex-wrap:wrap; align-items:flex-end; margin-bottom:16px; }
+.filter-group label { display:block; font-size:.8rem; font-weight:700; color:#475569; margin-bottom:4px; }
+.filter-group select, .filter-group input { padding:7px 10px; border:1px solid #e2e8f0; border-radius:8px; font-size:.88rem; background:#fff; color:#0f172a; }
+.filter-group select[multiple] { min-height:90px; min-width:180px; }
+.btn-apply { padding:8px 18px; background:var(--primary); color:#fff; border:none; border-radius:10px; font-weight:700; cursor:pointer; }
+.charts-2 { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+@media (max-width:860px){ .charts-2 { grid-template-columns:1fr; } }
+.table-scroll { overflow-x:auto; border:1px solid #e2e8f0; border-radius:12px; max-height:520px; overflow-y:auto; }
+table.dt { border-collapse:collapse; width:100%; font-size:.82rem; }
+table.dt th { background:#f1f5f9; padding:8px 10px; text-align:left; font-weight:700; color:#0f172a; border-bottom:1px solid #e2e8f0; white-space:nowrap; position:sticky; top:0; }
+table.dt td { padding:6px 10px; border-bottom:1px solid #f1f5f9; white-space:nowrap; color:#0f172a; }
+table.dt tr:hover td { background:#f8faff; }
+.tabs { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:14px; }
+.tab-btn { padding:7px 14px; border-radius:8px 8px 0 0; border:1px solid #e2e8f0; border-bottom:none; background:rgba(2,6,23,.04); color:#111827; font-weight:700; cursor:pointer; font-size:.88rem; }
+.tab-btn.active { background:#fff; border-bottom:2px solid #2563eb; }
+.tab-panel { display:none; }
+.tab-panel.active { display:block; }
+.alert-warn { background:#fef9c3; color:#854d0e; padding:14px 16px; border-radius:12px; margin-bottom:16px; }
+.alert-err { background:#fee2e2; color:#991b1b; padding:14px 16px; border-radius:12px; margin-bottom:16px; }
+.chart-caption { font-weight:700; font-size:.9rem; color:#0f172a; margin-bottom:4px; }
+.btn-csv { display:inline-block; padding:9px 16px; background:#fff; color:#0f172a; border:1px solid #e5e7eb; border-radius:10px; font-weight:700; cursor:pointer; margin-top:12px; }
+{% endblock %}
+{% block content %}
+<div class="dash-wrap">
+  <div class="dash-header">
+    <div class="dash-title">Painel de Dados</div>
+    <a class="back-link" href="{% url 'internal:index' %}">Voltar ao menu</a>
+  </div>
+
+  <div class="src-tabs">
+    <a class="src-tab {% if fonte == SRC_CCR %}active{% endif %}" href="?fonte={{ SRC_CCR|urlencode }}">Dados Clínicos CCR</a>
+    <a class="src-tab {% if fonte == SRC_BXL %}active{% endif %}" href="?fonte={{ SRC_BXL|urlencode }}">Biópsia Líquida — Agenda</a>
+  </div>
+
+  {% if error %}
+    <div class="alert-warn">{{ error }}</div>
+  {% endif %}
+
+  {# ================= PAINEL CLÍNICO ================= #}
+  {% if clinico and clinico.ok %}
+  <form method="get" class="card">
+    <input type="hidden" name="fonte" value="{{ SRC_CCR }}">
+    <div class="card-title">Painel Clínico — filtros</div>
+    <div class="filter-row">
+      <div class="filter-group">
+        <label>Estadiamento</label>
+        <select name="estadiamento" multiple>
+          {% for o in clinico.est_opts %}<option value="{{ o }}" {% if o in clinico.sel_est %}selected{% endif %}>{{ o }}</option>{% endfor %}
+        </select>
+      </div>
+      {% if clinico.sex_opts %}
+      <div class="filter-group">
+        <label>Sexo</label>
+        <select name="sexo" multiple>
+          {% for o in clinico.sex_opts %}<option value="{{ o }}" {% if o in clinico.sel_sex %}selected{% endif %}>{{ o }}</option>{% endfor %}
+        </select>
+      </div>
+      {% endif %}
+      {% if clinico.asa_opts %}
+      <div class="filter-group">
+        <label>ASA</label>
+        <select name="asa" multiple>
+          {% for o in clinico.asa_opts %}<option value="{{ o }}" {% if o in clinico.sel_asa %}selected{% endif %}>{{ o }}</option>{% endfor %}
+        </select>
+      </div>
+      {% endif %}
+      <div class="filter-group">
+        <label>Variável (distribuição)</label>
+        <select name="dist_var">
+          {% for o in clinico.dist_options %}<option value="{{ o }}" {% if o == clinico.dist_var %}selected{% endif %}>{{ o }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="filter-group">
+        <label><input type="checkbox" name="include_dates" value="1" {% if clinico.include_dates %}checked{% endif %}> Incluir datas no coorte</label>
+      </div>
+      <button type="submit" class="btn-apply">Aplicar</button>
+    </div>
+  </form>
+
+  <div class="card">
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="overview">Visão geral</button>
+      <button class="tab-btn" data-tab="dist">Distribuições</button>
+      <button class="tab-btn" data-tab="coorte">Coorte</button>
+    </div>
+
+    <div class="tab-panel active" data-panel="overview">
+      <div class="metrics">
+        <div class="metric"><div class="metric-v">{{ clinico.metrics.n_patients }}</div><div class="metric-l">Pacientes (CBL únicos)</div></div>
+        <div class="metric"><div class="metric-v">{{ clinico.metrics.idade_mediana }}</div><div class="metric-l">Idade mediana</div></div>
+        <div class="metric"><div class="metric-v">{{ clinico.metrics.imc_mediano }}</div><div class="metric-l">IMC mediano</div></div>
+        <div class="metric"><div class="metric-v">{{ clinico.metrics.cea_pre_mediana }}</div><div class="metric-l">CEA pré mediana</div></div>
+      </div>
+      <div class="charts-2" style="margin-top:16px">
+        <div><div class="chart-caption">Distribuição por Estadiamento · N = {{ clinico.metrics.n_patients }}</div>{{ clinico.chart_estadiamento|safe }}</div>
+        <div><div class="chart-caption">Distribuição por Estádio Patológico</div>{{ clinico.chart_estadio_pat|safe }}</div>
+      </div>
+    </div>
+
+    <div class="tab-panel" data-panel="dist">
+      <div class="chart-caption">Distribuição — {{ clinico.dist_var }}</div>
+      {% if clinico.chart_dist %}{{ clinico.chart_dist|safe }}{% else %}<p style="color:#64748b">Sem dados suficientes para esta variável.</p>{% endif %}
+    </div>
+
+    <div class="tab-panel" data-panel="coorte">
+      <div class="table-scroll">
+        <table class="dt">
+          <thead><tr>{% for c in clinico.coorte_columns %}<th>{{ c }}</th>{% endfor %}</tr></thead>
+          <tbody>
+            {% for row in clinico.coorte_rows %}
+            <tr>{% for v in row %}<td>{{ v }}</td>{% endfor %}</tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <button class="btn-csv" onclick="downloadCoorteCSV()">⬇️ Exportar CSV (coorte clínico limpo)</button>
+      <textarea id="coorte-csv-data" style="display:none">{{ clinico.coorte_csv }}</textarea>
+    </div>
+  </div>
+  {% elif clinico and clinico.warning %}
+    <div class="alert-warn">{{ clinico.warning }}</div>
+  {% endif %}
+
+  {# ================= PAINEL AGENDA BxL ================= #}
+  {% if agenda and agenda.ok %}
+  <form method="get" class="card">
+    <input type="hidden" name="fonte" value="{{ SRC_BXL }}">
+    <div class="card-title">Agenda de Coletas (BxL) — filtros</div>
+    <div class="filter-row">
+      <div class="filter-group">
+        <label>Aba da planilha</label>
+        <select name="sheet">
+          {% for s in agenda.sheetnames %}<option value="{{ s }}" {% if s == agenda.sheet %}selected{% endif %}>{{ s }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Segmento</label>
+        <select name="segmento">
+          {% for o in agenda.segmento_options %}<option value="{{ o }}" {% if o == agenda.segmento_sel %}selected{% endif %}>{{ o }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Paciente</label>
+        <select name="paciente">
+          {% for o in agenda.pacientes_options %}<option value="{{ o }}" {% if o == agenda.paciente_sel %}selected{% endif %}>{{ o }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Buscar CBL (contém)</label>
+        <input type="text" name="cbl_search" value="{{ agenda.cbl_search }}">
+      </div>
+      <div class="filter-group">
+        <label><input type="checkbox" name="hide_events" value="1" {% if agenda.hide_events %}checked{% endif %}> Ocultar eventos/falecimentos</label>
+      </div>
+      <button type="submit" class="btn-apply">Aplicar</button>
+    </div>
+  </form>
+
+  {% if agenda.eventos.has %}
+  <div class="card">
+    <div class="card-title">Painel de Eventos</div>
+    <div class="metrics">
+      <div class="metric"><div class="metric-v">{{ agenda.eventos.total }}</div><div class="metric-l">Pacientes</div></div>
+      <div class="metric"><div class="metric-v">{{ agenda.eventos.ativos }}</div><div class="metric-l">Ativos</div></div>
+      <div class="metric"><div class="metric-v">{{ agenda.eventos.eventos }}</div><div class="metric-l">Eventos</div></div>
+      <div class="metric"><div class="metric-v">{{ agenda.eventos.falec }}</div><div class="metric-l">Falecimentos</div></div>
+    </div>
+    {% if agenda.eventos.detalhes %}
+    <div class="table-scroll" style="margin-top:16px;max-height:300px">
+      <table class="dt">
+        <thead><tr><th>CBL</th><th>Tipo de evento</th><th>Data do evento</th><th>Grupo</th><th>Segmento</th><th>ID original</th></tr></thead>
+        <tbody>{% for r in agenda.eventos.detalhes %}<tr>{% for v in r %}<td>{{ v }}</td>{% endfor %}</tr>{% endfor %}</tbody>
+      </table>
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  {% if agenda.seg.has %}
+  <div class="card">
+    <div class="card-title">Distribuição por segmento (Cólon x Reto)</div>
+    <div class="metrics">
+      <div class="metric"><div class="metric-v">{{ agenda.seg.colon }}</div><div class="metric-l">Cólon</div></div>
+      <div class="metric"><div class="metric-v">{{ agenda.seg.reto }}</div><div class="metric-l">Reto</div></div>
+      <div class="metric"><div class="metric-v">{{ agenda.seg.indef }}</div><div class="metric-l">Indefinido</div></div>
+    </div>
+    {% if agenda.chart_segmento %}<div style="margin-top:8px">{{ agenda.chart_segmento|safe }}</div>{% endif %}
+  </div>
+  {% endif %}
+
+  <div class="card">
+    <div class="card-title">Visão geral das coletas</div>
+    {% if agenda.pend.empty %}
+      <p style="color:#64748b">Nenhuma coleta pendente encontrada para os filtros aplicados.</p>
+    {% else %}
+    <div class="metrics" style="margin-bottom:16px">
+      <div class="metric"><div class="metric-v">{{ agenda.pend.n_pend }}</div><div class="metric-l">Pendentes totais</div></div>
+      <div class="metric"><div class="metric-v">{{ agenda.pend.n_atras }}</div><div class="metric-l">Atrasadas</div></div>
+      <div class="metric"><div class="metric-v">{{ agenda.pend.n_0_30 }}</div><div class="metric-l">0–30 dias</div></div>
+      <div class="metric"><div class="metric-v">{{ agenda.pend.n_31 }}</div><div class="metric-l">31+ dias</div></div>
+    </div>
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="t_pend">Todas pendentes</button>
+      <button class="tab-btn" data-tab="t_atras">Atrasadas</button>
+      <button class="tab-btn" data-tab="t_07">0–7 dias</button>
+      <button class="tab-btn" data-tab="t_814">8–14 dias</button>
+      <button class="tab-btn" data-tab="t_1530">15–30 dias</button>
+      <button class="tab-btn" data-tab="t_31">31+ dias</button>
+    </div>
+    {% for key, label in agenda_tab_labels %}{% endfor %}
+    {% include "internal/_agenda_table.html" with pkey="t_pend" rows=agenda.tables.pend active=1 %}
+    {% include "internal/_agenda_table.html" with pkey="t_atras" rows=agenda.tables.atras %}
+    {% include "internal/_agenda_table.html" with pkey="t_07" rows=agenda.tables.f07 %}
+    {% include "internal/_agenda_table.html" with pkey="t_814" rows=agenda.tables.f814 %}
+    {% include "internal/_agenda_table.html" with pkey="t_1530" rows=agenda.tables.f1530 %}
+    {% include "internal/_agenda_table.html" with pkey="t_31" rows=agenda.tables.f31 %}
+    {% endif %}
+  </div>
+  {% elif agenda and agenda.error %}
+    <div class="alert-warn">{{ agenda.error }}</div>
+  {% endif %}
+</div>
+
+<script>
+document.querySelectorAll('.tabs').forEach(function(group){
+  var btns = group.querySelectorAll('.tab-btn');
+  var card = group.closest('.card');
+  btns.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var tab = btn.getAttribute('data-tab');
+      group.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      card.querySelectorAll('.tab-panel').forEach(function(p){
+        p.classList.toggle('active', p.getAttribute('data-panel') === tab);
+      });
+      // Plotly precisa de resize quando a aba fica visível
+      window.dispatchEvent(new Event('resize'));
+    });
+  });
+});
+function downloadCoorteCSV(){
+  var data = document.getElementById('coorte-csv-data').value;
+  var blob = new Blob([data], {type:'text/csv;charset=utf-8;'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'coorte_clinica_ccr_bxl.csv';
+  a.click();
+}
+</script>
+{% endblock %}

@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% block title %}Dados Clínicos CCR – CancerLab{% endblock %}
+{% block extra_css %}
+:root { --primary:#173975; --primary-hover:#0A74B7; }
+.int-wrap { max-width: 1100px; margin: 24px auto; padding: 0 16px; }
+.int-header { display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-bottom:6px; }
+.int-title { font-weight:900; font-size:1.3rem; color:#0f172a; }
+.back-link { font-size:.9rem; color:var(--primary); text-decoration:none; font-weight:700; }
+.subtle { color:#475569; font-size:.9rem; margin-bottom:12px; }
+.table-scroll { overflow:auto; border-radius:12px; border:1px solid #e2e8f0; max-height:380px; }
+.table-scroll table { width:100%; border-collapse:collapse; font-size:.83rem; }
+.table-scroll th { background:#f1f5f9; padding:8px 10px; font-weight:700; border-bottom:1px solid #e2e8f0;
+  white-space:nowrap; position:sticky; top:0; }
+.table-scroll td { padding:6px 10px; border-bottom:1px solid #f1f5f9; white-space:nowrap; }
+.table-scroll tr:hover td { background:#f8faff; }
+.card { background:#fff; border:1px solid #e2e8f0; border-radius:16px; padding:20px 22px;
+  box-shadow:0 8px 22px rgba(2,6,23,.06); margin-top:18px; }
+.card h3 { margin:0 0 4px; font-size:1.05rem; font-weight:900; color:#0f172a; }
+.card .hint { color:#64748b; font-size:.85rem; margin:0 0 14px; }
+.form-group { margin-bottom:12px; }
+.form-group label { display:block; font-weight:700; margin-bottom:4px; color:#475569; font-size:.85rem; }
+.form-control { width:100%; padding:9px 12px; border:1px solid #e2e8f0; border-radius:10px; font-size:.95rem;
+  background:#fff; color:#0f172a; }
+.form-control:focus { outline:none; border-color:var(--primary); }
+.btn { padding:9px 16px; border:none; border-radius:10px; font-weight:700; cursor:pointer; font-size:.9rem; }
+.btn-primary { background:var(--primary); color:#fff; } .btn-primary:hover { background:var(--primary-hover); }
+.btn-ghost { background:#fff; color:#475569; border:1px solid #e2e8f0; text-decoration:none; display:inline-block; }
+.alert-err { background:#fee2e2; color:#991b1b; padding:14px 16px; border-radius:12px; margin-bottom:16px; }
+.row-inline { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.tcle-img { max-height:220px; border-radius:8px; border:1px solid #e2e8f0; display:block; margin-bottom:8px; }
+details summary { cursor:pointer; font-weight:800; color:var(--primary); padding:10px 0; }
+.extras-box { border:1px solid #e2e8f0; border-radius:10px; padding:10px 12px; max-height:220px; overflow:auto; }
+.extras-box label { display:flex; align-items:center; gap:8px; font-weight:600; font-size:.86rem; margin:4px 0; color:#334155; }
+{% endblock %}
+{% block content %}
+<div class="int-wrap">
+  <div class="int-header">
+    <div class="int-title">Dados Clínicos — Pacientes CCR Biópsia Líquida</div>
+    <a class="back-link" href="{% url 'internal:index' %}">← Voltar ao menu</a>
+  </div>
+
+  {% if error %}<div class="alert-err">{{ error }}</div>
+  {% elif not file_exists %}<div style="background:#fef9c3;color:#854d0e;padding:14px 16px;border-radius:12px">Arquivo Excel não encontrado. Coloque-o na raiz do projeto Django.</div>
+  {% else %}
+    <p class="subtle">{{ total_rows }} paciente{{ total_rows|pluralize }} · selecione um para editar (por {{ id_col }}).</p>
+
+    <div class="table-scroll">{{ df_head|safe }}</div>
+
+    <div class="card">
+      <h3>Selecionar paciente</h3>
+      <div class="row-inline">
+        <select class="form-control" style="max-width:280px"
+                onchange="if(this.value!==''){window.location='?sel='+this.value+'#edit-section'}">
+          <option value="">— Selecione ({{ id_col }}) —</option>
+          {% for i, nome in patient_list %}
+            <option value="{{ i }}" {% if selected_idx == i %}selected{% endif %}>{{ nome }}</option>
+          {% endfor %}
+        </select>
+        {% if selected_patient is not None %}<span style="font-weight:800;color:#0f172a">{{ selected_patient }}</span>{% endif %}
+      </div>
+    </div>
+
+    {% if selected_idx is not None %}
+    <div class="card" id="edit-section">
+      <h3>Editar paciente</h3>
+      <form method="post" action="?sel={{ selected_idx }}" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="save_patient">
+        <input type="hidden" name="idx" value="{{ selected_idx }}">
+
+        <h4 style="margin:6px 0 4px;color:#0f172a">Campos principais</h4>
+        {% for campo, val in selected_main %}
+        <div class="form-group">
+          <label>{{ campo }}</label>
+          <input type="text" name="campo_{{ campo }}" class="form-control" value="{{ val }}">
+        </div>
+        {% endfor %}
+
+        <div class="form-group">
+          <label>TCLE — foto</label>
+          {% if tcle_exists %}
+            {% if tcle_url %}<img src="{{ tcle_url }}" alt="TCLE" class="tcle-img" onerror="this.style.display='none'">{% endif %}
+            <p class="hint">TCLE já enviado. Para substituir, carregue um novo arquivo.</p>
+          {% endif %}
+          <input type="file" name="tcle_foto" accept=".jpg,.jpeg,.png" class="form-control">
+        </div>
+
+        <details style="margin:6px 0 12px">
+          <summary>Outros dados (marque para editar)</summary>
+          <div class="extras-box" style="margin-top:8px">
+            {% for campo, val in selected_extras %}
+            <div class="form-group" style="margin-bottom:8px">
+              <label style="display:flex;gap:8px;align-items:center">
+                <input type="checkbox" name="outros" value="{{ campo }}"> {{ campo|truncatechars:44 }}
+              </label>
+              <input type="text" name="extra_{{ campo }}" class="form-control" value="{{ val }}">
+            </div>
+            {% endfor %}
+          </div>
+          <p class="hint" style="margin-top:6px">Apenas os campos marcados serão gravados.</p>
+        </details>
+
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button type="submit" class="btn btn-primary">Salvar alterações do paciente</button>
+          <a href="{% url 'internal:clinicos' %}" class="btn btn-ghost">Cancelar</a>
+        </div>
+      </form>
+    </div>
+    {% endif %}
+
+    <details style="margin-top:22px" id="novo" {% if not selected_idx %}open{% endif %}>
+      <summary>Cadastrar novo paciente</summary>
+      <div class="card" style="margin-top:10px">
+        <form method="post" action="{% url 'internal:clinicos' %}" enctype="multipart/form-data">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="add_patient">
+          <h4 style="margin:6px 0 4px;color:#0f172a">Campos principais</h4>
+          {% for campo in campos_principais %}
+          <div class="form-group">
+            <label>{{ campo }}</label>
+            <input type="text" name="new_{{ campo }}" class="form-control">
+          </div>
+          {% endfor %}
+          <div class="form-group">
+            <label>Foto do TCLE (obrigatório)</label>
+            <input type="file" name="tcle_foto" accept=".jpg,.jpeg,.png" class="form-control" required>
+          </div>
+          <details style="margin:6px 0 12px">
+            <summary>Outros dados do novo paciente</summary>
+            <div class="extras-box" style="margin-top:8px">
+              {% for campo in outros_campos %}
+              <div class="form-group" style="margin-bottom:8px">
+                <label style="display:flex;gap:8px;align-items:center">
+                  <input type="checkbox" name="novo_outros" value="{{ campo }}"> {{ campo|truncatechars:44 }}
+                </label>
+                <input type="text" name="new_extra_{{ campo }}" class="form-control">
+              </div>
+              {% endfor %}
+            </div>
+          </details>
+          <button type="submit" class="btn btn-primary">Adicionar novo paciente</button>
+        </form>
+      </div>
+    </details>
+  {% endif %}
+</div>
+{% endblock %}

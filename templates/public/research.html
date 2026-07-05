@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% block title %}Research – CancerLab{% endblock %}
+{% block extra_css %}
+html { -webkit-text-size-adjust: 100%; }
+*, *::before, *::after { box-sizing: border-box; min-width: 0; }
+.wrap { max-width: 1180px; margin: 32px auto; padding: 0 16px; overflow-wrap: anywhere; word-break: break-word; }
+@media (max-width: 480px) { .wrap { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); } }
+.wrap img, .wrap svg { max-width: 100%; height: auto; display: block; }
+.r-hero { background: radial-gradient(1200px 300px at 50% -50px, rgba(19,81,216,.12), transparent 60%); padding: 14px 0 6px; text-align: center; }
+.r-title { font-size: clamp(28px, 4.8vw, 48px); font-weight: 800; color: #0f172a; letter-spacing: -.01em; margin: 6px 0 10px; line-height: 1.08; }
+.r-sub { color: #1351d8; font-weight: 750; font-size: clamp(18px, 2.1vw, 20px); line-height: 1.55; margin: 8px auto 18px; max-width: 80ch; overflow-wrap: anywhere; }
+.topic-pills { display: grid; grid-template-columns: 1fr; gap: 12px; max-width: 980px; margin: 0 auto 18px; text-align: left; }
+@media (min-width: 720px) { .topic-pills { grid-template-columns: repeat(3, minmax(0,1fr)); } }
+.pill {
+  position: relative; display: flex; gap: 12px; align-items: flex-start;
+  padding: 14px 16px; border-radius: 14px; background: #fff; border: 1px solid #e7e7ef;
+  box-shadow: 0 8px 22px rgba(2,6,23,.06); transition: transform .2s ease, box-shadow .2s ease;
+  overflow-wrap: anywhere;
+}
+.pill:hover { transform: translateY(-2px); box-shadow: 0 14px 30px rgba(2,6,23,.10); }
+.pill-icon { flex: 0 0 36px; height: 36px; width: 36px; border-radius: 10px; display: grid; place-items: center; background: linear-gradient(180deg, rgba(19,81,216,.12), rgba(19,81,216,0)); border: 1px solid #dfe3f2; }
+.pill h4 { margin: 0 0 4px; font-size: 16px; color: #0f172a; }
+.pill p { margin: 0; font-size: 14.5px; line-height: 1.55; color: #1f2937; }
+.r-body { display: grid; gap: 24px; align-items: start; grid-template-columns: 1fr; margin-top: 12px; }
+@media (min-width: 980px) { .r-body { grid-template-columns: .85fr 1.15fr; gap: 28px; } }
+.r-side { position: sticky; top: 88px; background: #fff; border: 1px solid #e7e7ef; border-radius: 14px; padding: 14px; box-shadow: 0 8px 22px rgba(2,6,23,.06); }
+.r-side h5 { margin: 0 0 10px; font-size: 14px; letter-spacing: .04em; text-transform: uppercase; color: #334155; }
+.toc { list-style: none; margin: 0; padding: 0; overflow-wrap: anywhere; }
+.toc li a { display: block; padding: 8px 10px; border-radius: 10px; text-decoration: none; color: #0f172a; border: 1px dashed rgba(19,81,216,.25); margin: 6px 0; }
+.toc li a:hover { background: rgba(19,81,216,.06); }
+.r-content { display: grid; gap: 18px; }
+.section { background: #fff; border: 1px solid #e7e7ef; border-radius: 16px; padding: 18px 20px; box-shadow: 0 12px 28px rgba(2,6,23,.08); scroll-margin-top: clamp(64px, 10vh, 96px); }
+.section h2 { margin: 0 0 8px; font-size: clamp(18px, 2.6vw, 24px); line-height: 1.25; color: #0f172a; }
+.section .lede { color: #0f172a; font-weight: 600; }
+.section p { margin: 10px 0 0; font-size: 16.2px; line-height: 1.75; color: #1f2937; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.chip { font-size: 12.5px; padding: 4px 10px; border-radius: 999px; border: 1px solid #cfd6f3; background: #f7f9ff; color: #0f172a; font-weight: 700; }
+.wrap a { color: #1351d8; text-decoration: none; border-bottom: 1px dashed rgba(19,81,216,.35); }
+.wrap a:hover { text-decoration: underline; }
+@media (max-width: 979px) {
+  .r-side { position: static; top: auto; box-shadow: none; border: 1px dashed rgba(19,81,216,.25); background: #f8fafc; }
+  .r-side h5 { display: none; }
+  .toc { display: flex; gap: 8px; overflow-x: auto; padding: 8px 2px 10px; -webkit-overflow-scrolling: touch; }
+  .toc li { flex: 0 0 auto; }
+  .toc li a { margin: 0; border-style: solid; background: #fff; white-space: nowrap; }
+  .section { box-shadow: 0 6px 16px rgba(2,6,23,.06); padding: 16px 14px; }
+  .pill { padding: 12px 14px; gap: 10px; }
+}
+@media (prefers-reduced-motion: reduce) { .pill:hover { transform: none; box-shadow: 0 8px 22px rgba(2,6,23,.06); } }
+{% endblock %}
+{% block content %}
+<div class="wrap">
+  <section class="r-hero" aria-label="Research overview">
+    <div class="r-title">Research</div>
+    <p class="r-sub">Our Research is focused on 3 main topics:</p>
+    <div class="topic-pills">
+      <div class="pill">
+        <div class="pill-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3s6 6.4 6 10.2A6 6 0 1 1 6 13.2C6 9.4 12 3 12 3z" stroke="currentColor" stroke-width="1.6"/></svg>
+        </div>
+        <div><h4>Liquid biopsy tools</h4><p>The development and application of Liquid biopsy tools.</p></div>
+      </div>
+      <div class="pill">
+        <div class="pill-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 3c4 0 4 6 10 6M7 21c4 0 4-6 10-6M7 9c4 0 4-6 10-6M7 15c4 0 4 6 10 6" stroke="currentColor" stroke-width="1.6"/></svg>
+        </div>
+        <div><h4>Cancer epigenetics</h4><p>The study of methyltransferase enzymes in solid tumors and leukemias.</p></div>
+      </div>
+      <div class="pill">
+        <div class="pill-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 14c4 0 4-4 8-4m0 0c2 0 3 1 4 2m-4-2c-2 0-3-1-4-2M3 20l3-.6 9.4-9.4a2.1 2.1 0 0 0-3-3L3 16.4 3 20z" stroke="currentColor" stroke-width="1.6"/></svg>
+        </div>
+        <div><h4>CRISPR/Cas9 gene editing</h4><p>Selective knockout (KO) of cancer-related targets.</p></div>
+      </div>
+    </div>
+  </section>
+  <div class="r-body">
+    <aside class="r-side" aria-label="On this page">
+      <h5>On this page</h5>
+      <ul class="toc">
+        <li><a href="#liquid-biopsy">Liquid Biopsy Applications in Cancer</a></li>
+        <li><a href="#epigenetics">Cancer Epigenetics</a></li>
+        <li><a href="#gene-editing">CRISPR/Cas9 Gene Editing</a></li>
+      </ul>
+    </aside>
+    <main class="r-content">
+      <section id="liquid-biopsy" class="section" aria-labelledby="liquid-biopsy-h">
+        <h2 id="liquid-biopsy-h">Liquid Biopsy Applications in Cancer</h2>
+        <p class="lede">Our research line focuses on the development and clinical application of liquid biopsy as a non-invasive tool for early cancer detection, real-time monitoring of therapeutic response, and improved patient management.</p>
+        <p>We investigate circulating tumor DNA (ctDNA) in blood samples, aiming to identify and quantify genetic alterations associated with oncogenesis and tumor progression. This includes the detection of frequent mutations, gene amplifications, and absolute copy numbers of carcinogenic nucleic acid fragments. Using advanced technologies such as next-generation sequencing (NGS) and digital PCR, we design mutation panels tailored to cancer-specific profiles. A key aspect of this work is the evaluation of ctDNA as a diagnostic screening method for early cancer detection, as well as a dynamic biomarker to monitor tumor burden in patients undergoing targeted therapies. This approach enables the real-time assessment of treatment effectiveness and supports more personalized therapeutic decisions. We are also applying these strategies to colorectal cancer (CRC), the second most common and third deadliest cancer in Brazil. By assessing the prognostic value of ctDNA in CRC patients, we aim to improve recurrence monitoring and clinical management after surgical resection—the current curative standard of care. This project is supported by CNPq/MS and FAPDF, reinforcing our commitment to translating liquid biopsy into practice for better cancer outcomes.</p>
+        <div class="chips" aria-label="Focus tags">
+          <span class="chip">NGS</span><span class="chip">digital PCR</span><span class="chip">ctDNA</span>
+          <span class="chip">CRC</span><span class="chip">Screening</span><span class="chip">Therapy monitoring</span>
+        </div>
+      </section>
+      <section id="epigenetics" class="section" aria-labelledby="epigenetics-h">
+        <h2 id="epigenetics-h">Cancer Epigenetics</h2>
+        <p>Our laboratory investigates how epigenetic regulators, including protein methyltransferases and demethylases, influence the development and progression of solid tumors and leukemias. By studying their roles in gene regulation, chromatin organization, and genomic stability, we aim to uncover how their dysregulation drives cancer. We also seek to identify novel biomarkers and therapeutic targets, translating our findings into more precise and effective cancer treatments. We use a variety of approaches to investigate their association with carcinogenesis and to identify new prognostic markers and therapeutic targets. Our work highlights how the dysregulation of these enzymes are not just passive modifiers of the genome but active drivers of cancer biology, opening opportunities for more precise and effective treatments.</p>
+        <div class="chips" aria-label="Focus tags">
+          <span class="chip">Leukemias</span><span class="chip">Chromatin organization</span><span class="chip">Methyltransferases</span>
+        </div>
+      </section>
+      <section id="gene-editing" class="section" aria-labelledby="gene-editing-h">
+        <h2 id="gene-editing-h">CRISPR/Cas9 Gene Editing</h2>
+        <p>CRISPR-Cas9 is a powerful technology that allows scientists to precisely modify DNA within living cells. It uses a guide RNA to locate a specific DNA sequence and the Cas9 enzyme to make a targeted cut at that location. This cut can then be repaired by the cell, allowing us to disable, modify, or insert genes. In this context, our group is actively developing CRISPR/Cas9-based gene editing tools for selective knockout (KO) of cancer-related targets, with a primary focus on epigenetic modifiers. Although CRISPR is a relatively recent innovation in biotechnology, it has rapidly become an essential research tool. Our laboratory aims to serve as a facilitator, making CRISPR accessible to other research groups through collaborative efforts or service provision.</p>
+        <div class="chips" aria-label="Focus tags">
+          <span class="chip">KO</span><span class="chip">Cas9 nuclease</span><span class="chip">CRISPR/Cas9</span>
+          <span class="chip">Clonal isolation</span><span class="chip">Off-target analysis</span>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+{% endblock %}

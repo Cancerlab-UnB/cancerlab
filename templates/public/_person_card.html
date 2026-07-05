@@ -1,0 +1,19 @@
+{% load static %}
+<article class="person-card">
+  {% if person.photo %}
+    <img class="person-photo" src="{% static person.photo %}" alt="{{ person.name }}" loading="lazy" onerror="this.parentElement.querySelector('.person-photo-placeholder').style.display='flex'; this.style.display='none'">
+    <span class="person-photo-placeholder" style="display:none">👤</span>
+  {% else %}
+    <span class="person-photo-placeholder">👤</span>
+  {% endif %}
+  <div>
+    <div class="person-name">{{ person.name }}</div>
+    <div class="person-role">{{ person.role }}</div>
+    <p class="person-bio">{{ person.bio|truncatewords:40 }}</p>
+    <div class="person-links">
+      {% if person.email %}<a href="mailto:{{ person.email }}">✉ Email</a>{% endif %}
+      {% if person.lattes %}<a href="{{ person.lattes }}" target="_blank" rel="noopener">Lattes</a>{% endif %}
+      {% if person.orcid %}<a href="{{ person.orcid }}" target="_blank" rel="noopener">ORCID</a>{% endif %}
+    </div>
+  </div>
+</article>

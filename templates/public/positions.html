@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Open Positions – CancerLab{% endblock %}
+{% block extra_css %}
+.wrap { max-width: 1180px; margin: 28px auto 44px; padding: 0 16px; }
+.h1 { font-weight: 900; font-size: clamp(24px,3.6vw,36px); color: #0f172a; margin: 6px 0 6px; }
+.lead { color: #475569; margin: 0 0 18px; font-size: 1.02rem; }
+.index { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 18px; }
+.chip { display: inline-block; padding: 6px 10px; border: 1px solid #e6e8ee; border-radius: 999px; text-decoration: none; font-weight: 700; font-size: .92rem; color: #0f172a; background: #fff; }
+.chip:hover { border-color: #cfd6e6; }
+.hero { display: grid; gap: 18px; grid-template-columns: 1fr; }
+@media (min-width: 980px) { .hero { grid-template-columns: 1.05fr 0.95fr; } }
+.vcard, .tcard { background: #fff; border: 1px solid #e6e8ee; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 26px rgba(2,6,23,.06); }
+.vcard .media { background: #000; aspect-ratio: 16/9; }
+.vcard video, .vcard iframe { width: 100%; height: 100%; display: block; }
+.tcard { padding: 16px 18px; }
+.tcard h3 { margin: 0 0 8px; font-size: 18px; color: #0f172a; }
+.muted { color: #334155; font-size: .94rem; }
+.btns { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+.btn { display: inline-block; padding: 8px 12px; border-radius: 10px; text-decoration: none; font-weight: 800; background: #1351d8; color: #fff !important; }
+.btn:hover { background: #0d44b5; }
+.section { margin: 26px 0 0; scroll-margin-top: 90px; }
+.stitle { display: flex; align-items: center; gap: 10px; font-weight: 900; font-size: clamp(18px,2.6vw,24px); color: #0f172a; margin: 0 0 8px; }
+.scard { background: #fff; border: 1px solid #e6e8ee; border-radius: 14px; padding: 14px 16px; position: relative; }
+.scard::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: linear-gradient(#bfdbfe,#93c5fd); border-top-left-radius: 14px; border-bottom-left-radius: 14px; }
+.scard p, .scard li { line-height: 1.7; color: #0f172a; }
+.scard a { color: #1351d8; text-decoration: none; border-bottom: 1px dashed rgba(19,81,216,.35); }
+.scard a:hover { text-decoration: underline; }
+.ul { margin: 8px 0 0 18px; }
+.ul li { margin: 4px 0; }
+{% endblock %}
+{% block content %}
+<div class="wrap">
+  <div class="h1">Open Positions</div>
+  <nav class="index">
+    <a class="chip" href="#grad">Graduate Students</a>
+    <a class="chip" href="#postdoc">Postdoctoral Fellows</a>
+    <a class="chip" href="#undergrad">Undergraduate Students</a>
+    <a class="chip" href="#requirements">Application Requirements</a>
+  </nav>
+  <section class="hero">
+    <div class="tcard">
+      <h3>How to apply</h3>
+      <p class="muted">Send your materials to the appropriate contact below.</p>
+      <div class="btns">
+        <a class="btn" href="mailto:pittella@unb.br?subject=Application%20-%20CancerLab">Email Prof. Pittella</a>
+        <a class="btn" href="mailto:andreabm@unb.br?subject=Application%20-%20CancerLab">Email Prof. Motoyama</a>
+      </div>
+    </div>
+  </section>
+  <section class="section" id="grad">
+    <div class="stitle">Graduate Students</div>
+    <div class="scard"><p>All year around, the CancerLab is open to students interested in obtaining a Master and PhD degree through the institutional program of Molecular Pathology and Medical Sciences of the University of Brasilia. Please contact the respective professors via <a href="mailto:pittella@unb.br">pittella@unb.br</a> or <a href="mailto:andreabm@unb.br">andreabm@unb.br</a>.</p></div>
+  </section>
+  <section class="section" id="postdoc">
+    <div class="stitle">Postdoctoral Fellows</div>
+    <div class="scard">
+      <p>Postdoctoral candidates with experience in genetics, biochemistry, molecular biology or bioinformatics should send a cover letter with expected starting date, Curriculum vitae and names of THREE references to <a href="mailto:pittella@unb.br">pittella@unb.br</a>.</p>
+      <ul class="ul">
+        <li>Expected start date in the cover letter</li>
+        <li>Curriculum vitae</li>
+        <li>Names of <strong>three</strong> references</li>
+      </ul>
+    </div>
+  </section>
+  <section class="section" id="undergrad">
+    <div class="stitle">Undergraduate Students</div>
+    <div class="scard"><p>The CancerLab is open to undergraduates with major in biology, biotechnology, pharmaceutical sciences, medicine and health sciences. Students should contact Prof. Fabio Pittella (<a href="mailto:pittella@unb.br">pittella@unb.br</a>) or Andrea Motoyama (<a href="mailto:andreabm@unb.br">andreabm@unb.br</a>).</p></div>
+  </section>
+  <section class="section" id="requirements">
+    <div class="stitle">Application Requirements</div>
+    <div class="scard">
+      <ul class="ul">
+        <li>Cover letter</li>
+        <li>CV</li>
+        <li>Names of three references</li>
+      </ul>
+    </div>
+  </section>
+</div>
+{% endblock %}
