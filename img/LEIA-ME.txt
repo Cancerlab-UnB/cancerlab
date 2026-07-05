@@ -1,0 +1,11 @@
+Coloque nesta pasta as imagens do site (os nomes precisam ser exatamente estes):
+
+  logo-nave.png         -> logomarca do NaVe (quadrada, fundo transparente ou branco)
+  hero-lab.jpg          -> foto principal do laboratório (página inicial)
+  lab-equipamentos.jpg  -> foto dos equipamentos (página "O laboratório")
+  juliano-chaker.jpg    -> foto do Prof. Juliano Alexandre Chaker
+  marcelo-sousa.jpg     -> foto do Prof. Marcelo Henrique Sousa
+  daniel-ramos.jpg      -> foto do técnico Daniel dos Santos Ramos
+
+O site funciona sem as imagens (mostra um aviso no lugar), e elas aparecem
+automaticamente assim que os arquivos forem salvos aqui.

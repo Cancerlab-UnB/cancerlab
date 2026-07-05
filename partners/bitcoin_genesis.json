@@ -1,0 +1,36 @@
+{
+  "height": 0,
+  "hash": "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f",
+  "version": 1,
+  "previous_block": "0000000000000000000000000000000000000000000000000000000000000000",
+  "merkle_root": "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b",
+  "time": 1231006505,
+  "time_utc": "2009-01-03T18:15:05Z",
+  "bits": 486604799,
+  "nonce": 2083236893,
+  "tx_count": 1,
+  "transactions": [
+    {
+      "txid": "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b",
+      "version": 1,
+      "vin": [
+        {
+          "coinbase": "04ffff001d0104455468652054696d65732030332f4a616e2f32303039204368616e63656c6c6f72206f6e206272696e6b206f66207365636f6e64",
+          "sequence": 4294967295
+        }
+      ],
+      "vout": [
+        {
+          "value_btc": 50.0,
+          "n": 0,
+          "scriptPubKey_asm": "OP_DUP OP_HASH160 <pubKeyHash> OP_EQUALVERIFY OP_CHECKSIG",
+          "scriptPubKey_hex": "4104...ac"
+        }
+      ],
+      "size": 204,
+      "locktime": 0,
+      "note": "Coinbase transaction. The coinbase's scriptSig contains the message: 'The Times 03/Jan/2009 Chancellor on brink of second bailout for banks'"
+    }
+  ],
+  "note": "This is the Bitcoin genesis block (block 0). The merkle_root and coinbase message are canonical."
+}
